@@ -333,6 +333,102 @@ test("9) unvalidated tx => tx_not_validated", async () => {
   );
 });
 
+test("10a) sessionId matches in memo => ok", async () => {
+  const challenge = baseChallenge({ sessionId: "sess-abc" });
+  const receiptHeaderValue = encodeReceiptHeader({
+    network: challenge.network,
+    txHash: "TX10a",
+    paymentId: challenge.paymentId,
+  });
+
+  // buildXrplMemo includes sessionId from challenge.memo.sessionId
+  const fetchTransaction: FetchTransaction = async () => makeTx(challenge);
+  const replayStore = new InMemoryReplayStore();
+
+  const res = await verifySettlement({
+    challenge,
+    receiptHeaderValue,
+    fetchTransaction,
+    replayStore,
+  });
+  assert.equal(res.ok, true);
+  assert.equal(res.idempotent, false);
+});
+
+test("10b) sessionId mismatch in memo => invalid_memo", async () => {
+  const challenge = baseChallenge({ sessionId: "sess-abc" });
+  const receiptHeaderValue = encodeReceiptHeader({
+    network: challenge.network,
+    txHash: "TX10b",
+    paymentId: challenge.paymentId,
+  });
+
+  // Build memo with a different sessionId
+  const badMemoTx = makeTx(challenge, {
+    Memos: [
+      buildXrplMemo({
+        ...challenge,
+        memo: { ...challenge.memo, sessionId: "sess-WRONG" },
+      }),
+    ],
+  });
+
+  const fetchTransaction: FetchTransaction = async () => badMemoTx;
+  const replayStore = new InMemoryReplayStore();
+
+  await assert.rejects(
+    () =>
+      verifySettlement({
+        challenge,
+        receiptHeaderValue,
+        fetchTransaction,
+        replayStore,
+      }),
+    (error: unknown) => {
+      assert(error instanceof SettlementVerificationError);
+      assert.equal(error.code, "invalid_memo");
+      return true;
+    },
+  );
+});
+
+test("10c) sessionId in challenge but absent in memo => invalid_memo", async () => {
+  const challenge = baseChallenge({ sessionId: "sess-abc" });
+  const receiptHeaderValue = encodeReceiptHeader({
+    network: challenge.network,
+    txHash: "TX10c",
+    paymentId: challenge.paymentId,
+  });
+
+  // Build memo without sessionId
+  const noSessionMemoTx = makeTx(challenge, {
+    Memos: [
+      buildXrplMemo({
+        ...challenge,
+        memo: { format: "x402", paymentId: challenge.paymentId },
+      }),
+    ],
+  });
+
+  const fetchTransaction: FetchTransaction = async () => noSessionMemoTx;
+  const replayStore = new InMemoryReplayStore();
+
+  await assert.rejects(
+    () =>
+      verifySettlement({
+        challenge,
+        receiptHeaderValue,
+        fetchTransaction,
+        replayStore,
+      }),
+    (error: unknown) => {
+      assert(error instanceof SettlementVerificationError);
+      assert.equal(error.code, "invalid_memo");
+      return true;
+    },
+  );
+});
+
 test("10) tx not found => tx_not_found", async () => {
   const challenge = baseChallenge();
   const receiptHeaderValue = encodeReceiptHeader({

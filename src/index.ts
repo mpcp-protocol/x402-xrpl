@@ -393,7 +393,7 @@ export async function verifySettlement(
   }
 
   assertAmountAndAssetMatch(params.challenge, tx.Amount);
-  assertMemoMatches(tx.Memos, params.challenge.paymentId);
+  assertMemoMatches(tx.Memos, params.challenge);
 
   params.replayStore.register(params.challenge.paymentId, receipt.txHash);
 
@@ -533,7 +533,7 @@ function assertAmountAndAssetMatch(
 
 function assertMemoMatches(
   memos: XrplMemoContainer[] | undefined,
-  paymentId: string,
+  challenge: Pick<X402Challenge, "paymentId" | "memo">,
 ): void {
   if (memos === undefined || memos.length === 0) {
     throw new SettlementVerificationError(
@@ -579,11 +579,24 @@ function assertMemoMatches(
         parsed.v === 1 &&
         parsed.t === "x402" &&
         typeof parsed.paymentId === "string" &&
-        parsed.paymentId === paymentId
+        parsed.paymentId === challenge.paymentId
       ) {
+        // If challenge includes a sessionId, the memo MUST carry the same value.
+        if (
+          challenge.memo.sessionId !== undefined &&
+          parsed.sessionId !== challenge.memo.sessionId
+        ) {
+          throw new SettlementVerificationError(
+            "invalid_memo",
+            "memo sessionId does not match challenge sessionId",
+          );
+        }
         return;
       }
-    } catch {
+    } catch (err) {
+      if (err instanceof SettlementVerificationError) {
+        throw err;
+      }
       throw new SettlementVerificationError(
         "invalid_memo",
         "memo JSON is malformed",
