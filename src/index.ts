@@ -1,12 +1,37 @@
-export const ADAPTER_VERSION = "0.1.0";
+export const ADAPTER_VERSION = "0.2.0";
 export const RECEIPT_HEADER_NAME = "X-PAYMENT-RECEIPT";
 
+/**
+ * CAIP-2 identifiers for XRPL networks, as used by the x402 XRPL ecosystem
+ * (xrpl.org, the x402 Foundation reference scheme): the reference is the
+ * network ID. `xrpl:0` = Mainnet, `xrpl:1` = Testnet, `xrpl:2` = Devnet.
+ * Named aliases are accepted and compare equal to their canonical form.
+ *
+ * Breaking change in 0.2.0: `xrpl:1` used to mean Mainnet in this package.
+ */
+export const CANONICAL_NETWORKS = ["xrpl:0", "xrpl:1", "xrpl:2"] as const;
+export type CanonicalXrplNetwork = (typeof CANONICAL_NETWORKS)[number];
+
+export const NETWORK_ALIASES = {
+  "xrpl:mainnet": "xrpl:0",
+  "xrpl:testnet": "xrpl:1",
+  "xrpl:devnet": "xrpl:2",
+} as const satisfies Record<string, CanonicalXrplNetwork>;
+
 export const SUPPORTED_NETWORKS = [
-  "xrpl:1",
-  "xrpl:testnet",
-  "xrpl:devnet",
+  ...CANONICAL_NETWORKS,
+  ...(Object.keys(NETWORK_ALIASES) as (keyof typeof NETWORK_ALIASES)[]),
 ] as const;
-export type XrplNetwork = (typeof SUPPORTED_NETWORKS)[number];
+export type XrplNetwork = CanonicalXrplNetwork | keyof typeof NETWORK_ALIASES;
+
+/** Canonical CAIP-2 form of a supported network identifier. */
+export function canonicalNetwork(network: XrplNetwork): CanonicalXrplNetwork {
+  assertSupportedNetwork(network);
+  return (
+    (NETWORK_ALIASES as Record<string, CanonicalXrplNetwork>)[network] ??
+    (network as CanonicalXrplNetwork)
+  );
+}
 
 export type SettlementErrorCode =
   | "expired_challenge"
@@ -19,7 +44,8 @@ export type SettlementErrorCode =
   | "invalid_memo"
   | "replay_detected"
   | "tx_not_validated"
-  | "tx_not_found";
+  | "tx_not_found"
+  | "tx_failed";
 
 export class SettlementVerificationError extends Error {
   readonly code: SettlementErrorCode;
@@ -89,6 +115,13 @@ export interface XrplIssuedAmount {
   value: string;
 }
 
+export interface XrplTransactionMeta {
+  /** Engine result. Only `tesSUCCESS` moved funds; `tec*` results are validated but deliver nothing. */
+  TransactionResult?: string;
+  /** Amount actually delivered (rippled's synthetic `delivered_amount`). */
+  delivered_amount?: string | XrplIssuedAmount | "unavailable";
+}
+
 export interface XrplPaymentTransaction {
   validated: boolean;
   TransactionType: string;
@@ -96,11 +129,21 @@ export interface XrplPaymentTransaction {
   Destination?: string;
   DestinationTag?: number;
   Amount?: string | XrplIssuedAmount;
+  /** API v2 name for `Amount` on Payment transactions. */
+  DeliverMax?: string | XrplIssuedAmount;
   Flags?: number;
   Memos?: XrplMemoContainer[];
   SendMax?: unknown;
   Paths?: unknown;
   DeliverMin?: unknown;
+  /** Transaction metadata. Required: verification fails closed without it. */
+  meta?: XrplTransactionMeta;
+  /**
+   * ISO-8601 UTC close time of the ledger that validated the transaction. When
+   * present, the challenge expiry is checked against it (when the payer paid),
+   * not against the verification time.
+   */
+  closeTime?: string;
 }
 
 export type FetchTransactionResult = XrplPaymentTransaction | null;
@@ -122,6 +165,13 @@ export interface VerifySettlementParams {
   fetchTransaction: FetchTransaction;
   replayStore: ReplayStore;
   now?: Date;
+  /**
+   * How long after `expiresAt` a receipt may still be presented, in seconds,
+   * for a payment that was validated before `expiresAt` (ledger validation
+   * takes a few seconds). Default 60. Requires `closeTime` from the fetcher;
+   * without it the payment time is taken to be the verification time.
+   */
+  settlementGraceSeconds?: number;
 }
 
 export interface VerifySettlementResult {
@@ -132,6 +182,58 @@ export interface VerifySettlementResult {
 }
 
 const PARTIAL_PAYMENT_FLAG = 0x00020000;
+const RIPPLE_EPOCH_OFFSET_SECONDS = 946684800;
+
+/**
+ * Map a rippled / Clio `tx` method result (API v1 or v2) to the shape
+ * `verifySettlement` expects, including metadata and the ledger close time.
+ * Use it inside your `fetchTransaction` implementation:
+ *
+ *   const r = await client.request({ command: "tx", transaction: txHash });
+ *   return fromRippledTx(r.result);
+ */
+export function fromRippledTx(result: unknown): XrplPaymentTransaction | null {
+  if (typeof result !== "object" || result === null) {
+    return null;
+  }
+  const r = result as Record<string, unknown>;
+  // API v2 nests the transaction under tx_json; API v1 inlines it.
+  const tx = (
+    typeof r.tx_json === "object" && r.tx_json !== null ? r.tx_json : r
+  ) as Record<string, unknown>;
+  const meta = (
+    typeof r.meta === "object" && r.meta !== null ? r.meta : undefined
+  ) as XrplTransactionMeta | undefined;
+
+  let closeTime: string | undefined;
+  if (typeof r.close_time_iso === "string") {
+    closeTime = new Date(r.close_time_iso).toISOString();
+  } else {
+    const date = typeof tx.date === "number" ? tx.date : r.date;
+    if (typeof date === "number") {
+      closeTime = new Date(
+        (date + RIPPLE_EPOCH_OFFSET_SECONDS) * 1000,
+      ).toISOString();
+    }
+  }
+
+  return {
+    validated: r.validated === true,
+    TransactionType: String(tx.TransactionType ?? ""),
+    Account: tx.Account as string | undefined,
+    Destination: tx.Destination as string | undefined,
+    DestinationTag: tx.DestinationTag as number | undefined,
+    Amount: tx.Amount as XrplPaymentTransaction["Amount"],
+    DeliverMax: tx.DeliverMax as XrplPaymentTransaction["DeliverMax"],
+    Flags: tx.Flags as number | undefined,
+    Memos: tx.Memos as XrplMemoContainer[] | undefined,
+    SendMax: tx.SendMax,
+    Paths: tx.Paths,
+    DeliverMin: tx.DeliverMin,
+    meta,
+    closeTime,
+  };
+}
 
 export class InMemoryReplayStore implements ReplayStore {
   private readonly paymentIdToTxHash = new Map<string, string>();
@@ -291,11 +393,26 @@ export async function verifySettlement(
   const now = params.now ?? new Date();
 
   validateChallenge(params.challenge);
-  validateChallengeNotExpired(params.challenge, now);
+  const graceMs = (params.settlementGraceSeconds ?? 60) * 1000;
+  if (!(graceMs >= 0)) {
+    throw new SettlementVerificationError(
+      "invalid_challenge",
+      "settlementGraceSeconds must be a non-negative number",
+    );
+  }
+  // Receipts presented long after expiry are refused outright (this also bounds
+  // the window in which a non-persistent replay store could be bypassed).
+  validateChallengeNotExpired(
+    params.challenge,
+    now,
+    graceMs,
+    "challenge has expired",
+  );
 
   const receipt = decodeReceiptHeader(params.receiptHeaderValue);
+  const network = canonicalNetwork(params.challenge.network);
 
-  if (receipt.network !== params.challenge.network) {
+  if (canonicalNetwork(receipt.network) !== network) {
     throw new SettlementVerificationError(
       "network_mismatch",
       "receipt.network does not match challenge.network",
@@ -338,10 +455,7 @@ export async function verifySettlement(
     return { ok: true, idempotent: true, receipt };
   }
 
-  const tx = await params.fetchTransaction(
-    params.challenge.network,
-    receipt.txHash,
-  );
+  const tx = await params.fetchTransaction(network, receipt.txHash);
   if (tx === null) {
     throw new SettlementVerificationError(
       "tx_not_found",
@@ -353,6 +467,17 @@ export async function verifySettlement(
     throw new SettlementVerificationError(
       "tx_not_validated",
       "transaction is not a validated Payment",
+    );
+  }
+  // A validated transaction is not necessarily a successful one: tec* results
+  // are included in a ledger (the fee is charged) but deliver nothing.
+  const result = tx.meta?.TransactionResult;
+  if (result !== "tesSUCCESS") {
+    throw new SettlementVerificationError(
+      "tx_failed",
+      result === undefined
+        ? "transaction metadata (meta.TransactionResult) is required"
+        : `transaction did not succeed: ${result}`,
     );
   }
   if (typeof tx.Account !== "string" || tx.Account.trim().length === 0) {
@@ -392,8 +517,37 @@ export async function verifySettlement(
     );
   }
 
-  assertAmountAndAssetMatch(params.challenge, tx.Amount);
+  assertAmountAndAssetMatch(params.challenge, tx.Amount ?? tx.DeliverMax);
+
+  // The delivered amount is authoritative (it is what the destination received).
+  const delivered = tx.meta?.delivered_amount;
+  if (delivered === undefined || delivered === "unavailable") {
+    throw new SettlementVerificationError(
+      "tx_failed",
+      "meta.delivered_amount is required",
+    );
+  }
+  assertAmountAndAssetMatch(params.challenge, delivered);
+
   assertMemoMatches(tx.Memos, params.challenge);
+
+  // Expiry: was the payment made in time? Use the validating ledger's close
+  // time when the fetcher provides it; otherwise the verification time.
+  if (tx.closeTime !== undefined) {
+    validateChallengeNotExpired(
+      params.challenge,
+      parseLedgerTime(tx.closeTime),
+      0,
+      "payment was validated after the challenge expired",
+    );
+  } else {
+    validateChallengeNotExpired(
+      params.challenge,
+      now,
+      0,
+      "challenge has expired",
+    );
+  }
 
   params.replayStore.register(params.challenge.paymentId, receipt.txHash);
 
@@ -454,9 +608,22 @@ function validateChallenge(challenge: X402Challenge): void {
   assertFutureOrPresentISODate(challenge.expiresAt, "invalid_challenge");
 }
 
+function parseLedgerTime(value: string): Date {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    throw new SettlementVerificationError(
+      "tx_not_validated",
+      "tx.closeTime is not a valid ISO-8601 timestamp",
+    );
+  }
+  return date;
+}
+
 function validateChallengeNotExpired(
   challenge: X402Challenge,
-  now: Date,
+  at: Date,
+  graceMs: number,
+  message: string,
 ): void {
   const expiresAt = new Date(challenge.expiresAt);
   if (Number.isNaN(expiresAt.getTime())) {
@@ -465,11 +632,8 @@ function validateChallengeNotExpired(
       "challenge.expiresAt is not valid ISO-8601",
     );
   }
-  if (now.getTime() > expiresAt.getTime()) {
-    throw new SettlementVerificationError(
-      "expired_challenge",
-      "challenge has expired",
-    );
+  if (at.getTime() > expiresAt.getTime() + graceMs) {
+    throw new SettlementVerificationError("expired_challenge", message);
   }
 }
 

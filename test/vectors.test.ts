@@ -11,6 +11,7 @@ import {
   encodeReceiptHeader,
   verifySettlement,
   type FetchTransaction,
+  type XrplNetwork,
   type XrplPaymentTransaction,
 } from "../src/index.js";
 
@@ -19,13 +20,15 @@ interface VectorStep {
   receiptRaw?: string;
   txByHash: Record<string, XrplPaymentTransaction & { memoPaymentId?: string }>;
   expect: { ok?: boolean; idempotent?: boolean; errorCode?: string };
+  /** Verification time (ISO-8601); defaults to the real clock. */
+  now?: string;
 }
 
 interface VectorCase {
   id: string;
   description: string;
   challenge: {
-    network: "xrpl:1" | "xrpl:testnet" | "xrpl:devnet";
+    network: XrplNetwork;
     amount: string;
     asset: { kind: "XRP" } | { kind: "IOU"; currency: string; issuer: string };
     destination: string;
@@ -73,7 +76,7 @@ const vectorsDoc = JSON.parse(await readFile(vectorsPath, "utf-8")) as {
 };
 
 test("shared conformance vectors", async () => {
-  assert.equal(vectorsDoc.version, "1");
+  assert.equal(vectorsDoc.version, "2");
 
   for (const vector of vectorsDoc.cases) {
     const challenge = createChallenge({
@@ -92,7 +95,7 @@ test("shared conformance vectors", async () => {
       const receiptHeaderValue =
         step.receiptRaw ??
         encodeReceiptHeader({
-          network: step.receipt!.network as "xrpl:1" | "xrpl:testnet" | "xrpl:devnet",
+          network: step.receipt!.network as XrplNetwork,
           txHash: step.receipt!.txHash,
           paymentId: step.receipt!.paymentId,
         });
@@ -105,6 +108,7 @@ test("shared conformance vectors", async () => {
               receiptHeaderValue,
               fetchTransaction,
               replayStore,
+              now: step.now !== undefined ? new Date(step.now) : undefined,
             }),
           (error: unknown) => {
             assert(error instanceof SettlementVerificationError);
@@ -120,6 +124,7 @@ test("shared conformance vectors", async () => {
         receiptHeaderValue,
         fetchTransaction,
         replayStore,
+        now: step.now !== undefined ? new Date(step.now) : undefined,
       });
       assert.equal(result.ok, step.expect.ok ?? true, `${vector.id}: ${vector.description}`);
       assert.equal(

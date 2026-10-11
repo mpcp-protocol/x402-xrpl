@@ -1,5 +1,5 @@
 {
-  "version": "1",
+  "version": "2",
   "cases": [
     {
       "id": "xrp_happy_path",
@@ -22,7 +22,8 @@
               "Account": "rPAYER-A",
               "Destination": "rDEST-A",
               "Amount": "2500000",
-              "memoPaymentId": "VEC-XRP-OK"
+              "memoPaymentId": "VEC-XRP-OK",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "2500000" }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -50,7 +51,11 @@
               "Account": "rPAYER-B",
               "Destination": "rDEST-B",
               "Amount": { "currency": "RLUSD", "issuer": "rISSUER", "value": "10.25" },
-              "memoPaymentId": "VEC-IOU-OK"
+              "memoPaymentId": "VEC-IOU-OK",
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": { "currency": "RLUSD", "issuer": "rISSUER", "value": "10.25" }
+              }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -78,7 +83,8 @@
               "Account": "rPAYER-C",
               "Destination": "rDEST-C",
               "Amount": "1000000",
-              "memoPaymentId": "VEC-REPLAY-SAME"
+              "memoPaymentId": "VEC-REPLAY-SAME",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -92,7 +98,8 @@
               "Account": "rPAYER-C",
               "Destination": "rDEST-C",
               "Amount": "1000000",
-              "memoPaymentId": "VEC-REPLAY-SAME"
+              "memoPaymentId": "VEC-REPLAY-SAME",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
             }
           },
           "expect": { "ok": true, "idempotent": true }
@@ -120,7 +127,8 @@
               "Account": "rPAYER-D",
               "Destination": "rDEST-D",
               "Amount": "1000000",
-              "memoPaymentId": "VEC-REPLAY-DIFF"
+              "memoPaymentId": "VEC-REPLAY-DIFF",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -134,7 +142,8 @@
               "Account": "rPAYER-D",
               "Destination": "rDEST-D",
               "Amount": "1000000",
-              "memoPaymentId": "VEC-REPLAY-DIFF"
+              "memoPaymentId": "VEC-REPLAY-DIFF",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
             }
           },
           "expect": { "errorCode": "replay_detected" }
@@ -162,7 +171,8 @@
               "Account": "rPAYER-E",
               "Destination": "rDEST-E",
               "Amount": "2500000",
-              "memoPaymentId": "VEC-MEMO-OTHER"
+              "memoPaymentId": "VEC-MEMO-OTHER",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "2500000" }
             }
           },
           "expect": { "errorCode": "invalid_memo" }
@@ -190,7 +200,8 @@
               "Account": "rPAYER-F",
               "Destination": "rDEST-F",
               "Amount": "2500001",
-              "memoPaymentId": "VEC-AMOUNT"
+              "memoPaymentId": "VEC-AMOUNT",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "2500001" }
             }
           },
           "expect": { "errorCode": "invalid_amount" }
@@ -219,7 +230,8 @@
               "Destination": "rDEST-G",
               "Amount": "3000000",
               "memoPaymentId": "VEC-PATHS",
-              "Paths": [{}]
+              "Paths": [{}],
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "3000000" }
             }
           },
           "expect": { "errorCode": "invalid_asset" }
@@ -248,7 +260,8 @@
               "Destination": "rDEST-H",
               "Amount": "3000000",
               "memoPaymentId": "VEC-PARTIAL",
-              "Flags": 131072
+              "Flags": 131072,
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "3000000" }
             }
           },
           "expect": { "errorCode": "invalid_asset" }
@@ -271,6 +284,330 @@
           "receiptRaw": "not-base64",
           "txByHash": {},
           "expect": { "errorCode": "invalid_receipt" }
+        }
+      ]
+    },
+    {
+      "id": "tec_result_rejected",
+      "description": "A validated Payment with a tec result delivered nothing",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-TEC"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-TEC", "paymentId": "VEC-TEC" },
+          "txByHash": {
+            "TX-TEC": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-TEC",
+              "meta": { "TransactionResult": "tecUNFUNDED_PAYMENT", "delivered_amount": "0" }
+            }
+          },
+          "expect": { "errorCode": "tx_failed" }
+        }
+      ]
+    },
+    {
+      "id": "missing_meta_rejected",
+      "description": "Without metadata the result cannot be checked: fail closed",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-NOMETA"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-NOMETA", "paymentId": "VEC-NOMETA" },
+          "txByHash": {
+            "TX-NOMETA": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-NOMETA"
+            }
+          },
+          "expect": { "errorCode": "tx_failed" }
+        }
+      ]
+    },
+    {
+      "id": "delivered_amount_mismatch",
+      "description": "delivered_amount is authoritative and must match the challenge",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-DELIV"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-DELIV", "paymentId": "VEC-DELIV" },
+          "txByHash": {
+            "TX-DELIV": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-DELIV",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "999999" }
+            }
+          },
+          "expect": { "errorCode": "invalid_amount" }
+        }
+      ]
+    },
+    {
+      "id": "delivered_amount_unavailable",
+      "description": "delivered_amount \"unavailable\" (pre-2014 ledgers) is rejected",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-UNAV"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-UNAV", "paymentId": "VEC-UNAV" },
+          "txByHash": {
+            "TX-UNAV": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-UNAV",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "unavailable" }
+            }
+          },
+          "expect": { "errorCode": "tx_failed" }
+        }
+      ]
+    },
+    {
+      "id": "deliver_max_api_v2",
+      "description": "API v2 names the amount DeliverMax",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-V2"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-V2", "paymentId": "VEC-V2" },
+          "txByHash": {
+            "TX-V2": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "memoPaymentId": "VEC-V2",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "DeliverMax": "1000000"
+            }
+          },
+          "expect": { "ok": true, "idempotent": false }
+        }
+      ]
+    },
+    {
+      "id": "caip2_mainnet_alias",
+      "description": "xrpl:0 and xrpl:mainnet are the same network",
+      "challenge": {
+        "network": "xrpl:0",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-MAIN"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:mainnet", "txHash": "TX-MAIN", "paymentId": "VEC-MAIN" },
+          "txByHash": {
+            "TX-MAIN": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-MAIN",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+            }
+          },
+          "expect": { "ok": true, "idempotent": false }
+        }
+      ]
+    },
+    {
+      "id": "caip2_testnet_is_xrpl_1",
+      "description": "xrpl:1 is Testnet: it matches xrpl:testnet",
+      "challenge": {
+        "network": "xrpl:1",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-T1"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-T1", "paymentId": "VEC-T1" },
+          "txByHash": {
+            "TX-T1": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-T1",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+            }
+          },
+          "expect": { "ok": true, "idempotent": false }
+        }
+      ]
+    },
+    {
+      "id": "caip2_network_mismatch",
+      "description": "A Testnet receipt does not satisfy a Mainnet challenge",
+      "challenge": {
+        "network": "xrpl:0",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2099-01-01T00:00:00Z",
+        "paymentId": "VEC-MIS"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:1", "txHash": "TX-MIS", "paymentId": "VEC-MIS" },
+          "txByHash": {
+            "TX-MIS": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-MIS",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+            }
+          },
+          "expect": { "errorCode": "network_mismatch" }
+        }
+      ]
+    },
+    {
+      "id": "paid_in_time_verified_within_grace",
+      "description": "Validated before expiry, verified 30 s after: accepted (default grace 60 s)",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2030-01-01T00:00:00Z",
+        "paymentId": "VEC-GRACE"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-GRACE", "paymentId": "VEC-GRACE" },
+          "txByHash": {
+            "TX-GRACE": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-GRACE",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "closeTime": "2029-12-31T23:59:58Z"
+            }
+          },
+          "expect": { "ok": true, "idempotent": false },
+          "now": "2030-01-01T00:00:30Z"
+        }
+      ]
+    },
+    {
+      "id": "paid_after_expiry",
+      "description": "Validated after expiry: rejected even inside the grace window",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2030-01-01T00:00:00Z",
+        "paymentId": "VEC-LATE"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-LATE", "paymentId": "VEC-LATE" },
+          "txByHash": {
+            "TX-LATE": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-LATE",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "closeTime": "2030-01-01T00:00:05Z"
+            }
+          },
+          "expect": { "errorCode": "expired_challenge" },
+          "now": "2030-01-01T00:00:30Z"
+        }
+      ]
+    },
+    {
+      "id": "presented_after_grace",
+      "description": "Validated in time but presented after the grace window: rejected",
+      "challenge": {
+        "network": "xrpl:testnet",
+        "amount": "1",
+        "asset": { "kind": "XRP" },
+        "destination": "rDEST-N",
+        "expiresAt": "2030-01-01T00:00:00Z",
+        "paymentId": "VEC-STALE"
+      },
+      "steps": [
+        {
+          "receipt": { "network": "xrpl:testnet", "txHash": "TX-STALE", "paymentId": "VEC-STALE" },
+          "txByHash": {
+            "TX-STALE": {
+              "validated": true,
+              "TransactionType": "Payment",
+              "Account": "rPAYER-N",
+              "Destination": "rDEST-N",
+              "Amount": "1000000",
+              "memoPaymentId": "VEC-STALE",
+              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "closeTime": "2029-12-31T23:59:58Z"
+            }
+          },
+          "expect": { "errorCode": "expired_challenge" },
+          "now": "2030-01-01T00:05:00Z"
         }
       ]
     }

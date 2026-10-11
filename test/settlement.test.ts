@@ -12,10 +12,22 @@ import {
   type XrplPaymentTransaction,
 } from "../src/index.js";
 
+// Fixtures here test replay and matching invariants, so every transaction is a
+// successful one unless it says otherwise (result checks live in conformance.test.ts).
+function succeeded(tx: XrplPaymentTransaction): XrplPaymentTransaction {
+  return {
+    meta: { TransactionResult: "tesSUCCESS", delivered_amount: tx.Amount },
+    ...tx,
+  };
+}
+
 function makeFetchTransaction(
   txByHash: Record<string, XrplPaymentTransaction>,
 ): FetchTransaction {
-  return async (_network, txHash) => txByHash[txHash] ?? null;
+  return async (_network, txHash) => {
+    const tx = txByHash[txHash];
+    return tx === undefined ? null : succeeded(tx);
+  };
 }
 
 test("replay invariant: same paymentId + same txHash -> idempotent success", async () => {
