@@ -38,6 +38,29 @@ Designed for:
 
 This is the server-side enforcement layer.
 
+## Schemes
+
+Two settlement schemes, both server-side enforced:
+
+- **`prepaid`** (`./index`) — the client submits the XRPL `Payment` itself and
+  returns the transaction hash; the server verifies the validated transaction
+  (amount, memo binding, `tesSUCCESS`, replay). This is the original flow. See
+  [docs/SPEC.md](docs/SPEC.md).
+- **`exact`** (`./exact`) — the standard, interoperable x402 XRPL flow: the
+  client sends a **presigned** `Payment` blob, the server verifies it **offline
+  — signatures and multisig quorum included — before anything is submitted**,
+  then submits and confirms `tesSUCCESS`. Works for multisig payers (e.g.
+  engagement accounts). See [docs/SPEC-exact.md](docs/SPEC-exact.md).
+
+The x402 v2 HTTP envelope (`PAYMENT-REQUIRED` / `PAYMENT-SIGNATURE` /
+`PAYMENT-RESPONSE`) is in [`./envelope`](src/envelope.ts).
+
+> Offline signature verification is not optional in `exact`: a facilitator that
+> answers `/verify` without it can be made to report a payment as valid that the
+> ledger will reject at submission, so a merchant that serves on `/verify` would
+> deliver for nothing. `verifyExactPayload` refuses below-quorum, wrong-signer,
+> and tampered transactions.
+
 ## Quick start
 
 ```bash

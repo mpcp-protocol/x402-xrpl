@@ -1,6 +1,6 @@
 {
   "name": "x402-xrpl-settlement-adapter",
-  "version": "0.1.5",
+  "version": "0.3.0",
   "private": false,
   "description": "TypeScript x402 v2 settlement adapter for XRPL: issue challenges, build payment memos, verify on-ledger settlement, replay-safe.",
   "license": "MIT",
@@ -35,6 +35,14 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./exact": {
+      "import": "./dist/exact.js",
+      "types": "./dist/exact.d.ts"
+    },
+    "./envelope": {
+      "import": "./dist/envelope.js",
+      "types": "./dist/envelope.d.ts"
     }
   },
   "files": [
@@ -58,5 +66,9 @@
     "tsup": "^8.5.0",
     "tsx": "^4.21.0",
     "typescript": "^5.4.0"
+  },
+  "dependencies": {
+    "ripple-binary-codec": "2.11.0",
+    "ripple-keypairs": "3.1.0"
   }
 }
