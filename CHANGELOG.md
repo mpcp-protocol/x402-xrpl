@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.3.0 (unreleased)
+
+Adds the standard `exact` scheme and the x402 v2 HTTP envelope, so engagement
+accounts (and any multisig payer) can be paid through an interoperable flow —
+and so the pre-submission signature check that a facilitator must not skip is
+built in. See [docs/SPEC-exact.md](docs/SPEC-exact.md).
+
+### Added
+
+- **`exact` scheme** (`x402-xrpl-settlement-adapter/exact`): `verifyExactPayload`
+  verifies a presigned `Payment` offline — destination, amount/asset, forbidden
+  fields, `InvoiceID` binding, `LastLedgerSequence`, fee policy, sequencing, and
+  **signatures**: single-sig against the account's master/regular key, and
+  multisig against the payer's on-ledger `SignerList` (each signer authorized,
+  no duplicates, summed weights `>= quorum`). `confirmExactSettlement` checks the
+  submitted transaction validated with `tesSUCCESS` and the delivered amount,
+  replay-safe. Submission stays with the caller's XRPL client (no keys, no sockets).
+- **v2 envelope** (`x402-xrpl-settlement-adapter/envelope`): encode/decode for
+  `PAYMENT-REQUIRED`, `PAYMENT-SIGNATURE`, `PAYMENT-RESPONSE`, and the
+  `PaymentRequired` / `PaymentRequirements` / `PaymentPayload` / `SettlementResponse`
+  types. Re-exported from the root entry.
+- `toPaymentRequirements(challenge, { scheme, maxTimeoutSeconds, extra })` bridge,
+  and `xrpToDrops` / `dropsToXrp`.
+- New dependencies: `ripple-binary-codec`, `ripple-keypairs` (used only by the
+  `exact` scheme; the settlement-verification and envelope paths stay dependency-free).
+
+### Changed
+
+- The client-prepaid, receipt-based flow in `./index` is now named the `prepaid`
+  scheme. `X-PAYMENT-RECEIPT` still works and is marked deprecated in favour of
+  the v2 envelope headers.
+
 ## 0.2.0 (unreleased)
 
 ### Security

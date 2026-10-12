@@ -1,4 +1,9 @@
-export const ADAPTER_VERSION = "0.2.0";
+export const ADAPTER_VERSION = "0.3.0";
+/**
+ * Legacy header for the client-prepaid flow ({@link verifySettlement}).
+ * @deprecated Prefer the x402 v2 envelope in `./envelope` (`PAYMENT-SIGNATURE` /
+ * `PAYMENT-RESPONSE`). Still accepted for backward compatibility.
+ */
 export const RECEIPT_HEADER_NAME = "X-PAYMENT-RECEIPT";
 
 /**
@@ -836,7 +841,8 @@ function normalizeDecimal(value: string): string {
   return fraction.length > 0 ? `${integer}.${fraction}` : integer;
 }
 
-function xrpToDrops(xrp: string): string {
+/** Convert a decimal XRP string to an integer drops string. */
+export function xrpToDrops(xrp: string): string {
   // xrp is a normalized decimal string from normalizeDecimal / createChallenge
   assertDecimalAmount(xrp, "invalid_amount");
 
@@ -855,7 +861,8 @@ function xrpToDrops(xrp: string): string {
   return drops;
 }
 
-function dropsToXrp(drops: string): string {
+/** Convert an integer drops string to a decimal XRP string. */
+export function dropsToXrp(drops: string): string {
   if (!/^\d+$/.test(drops)) {
     throw new SettlementVerificationError(
       "invalid_amount",
@@ -911,4 +918,44 @@ function utf8ToBase64(input: string): string {
 
 function base64ToUtf8(input: string): string {
   return Buffer.from(input, "base64").toString("utf8");
+}
+
+// ── x402 v2 envelope + scheme bridge ─────────────────────────────────────────
+
+export * from "./envelope.js";
+import type { PaymentRequirements } from "./envelope.js";
+
+/**
+ * Build a v2 {@link PaymentRequirements} from a challenge, in atomic units
+ * (drops for XRP, decimal value for IOU). For the `exact` scheme pass
+ * `extra: { areFeesSponsored: false, invoiceId }` (and the issuer is filled in
+ * automatically for IOU assets).
+ */
+export function toPaymentRequirements(
+  challenge: X402Challenge,
+  opts: {
+    scheme: string;
+    maxTimeoutSeconds: number;
+    extra?: Record<string, unknown>;
+  },
+): PaymentRequirements {
+  const amount =
+    challenge.asset.kind === "XRP"
+      ? xrpToDrops(challenge.amount)
+      : challenge.amount;
+  const asset =
+    challenge.asset.kind === "XRP" ? "XRP" : challenge.asset.currency;
+  const extra: Record<string, unknown> = { ...(opts.extra ?? {}) };
+  if (challenge.asset.kind === "IOU" && extra.issuer === undefined) {
+    extra.issuer = challenge.asset.issuer;
+  }
+  return {
+    scheme: opts.scheme,
+    network: challenge.network,
+    amount,
+    asset,
+    payTo: challenge.destination,
+    maxTimeoutSeconds: opts.maxTimeoutSeconds,
+    extra: Object.keys(extra).length > 0 ? extra : undefined,
+  };
 }
