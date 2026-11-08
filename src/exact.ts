@@ -75,6 +75,16 @@ export interface XrplAccountState {
   tickets?: number[];
 }
 
+/**
+ * Reads one account's state at the latest validated ledger; resolves `null`
+ * for an account that does not exist.
+ *
+ * Multisig verification calls this for every signer at once (up to 32
+ * concurrent calls, the XRPL SignerList maximum), so an implementation must
+ * handle overlapping calls; add your own limiter if your RPC needs one.
+ * Errors it throws or rejects with propagate from `verifyExactPayload`
+ * unchanged, not wrapped in `ExactVerificationError`.
+ */
 export type FetchAccountState = (
   network: string,
   account: string,
@@ -86,7 +96,7 @@ export interface VerifyExactParams {
   requirements: PaymentRequirements;
   /** The `payload` object from the PaymentPayload; must contain `signedTxBlob`. */
   payload: Record<string, unknown>;
-  /** Reads payer and signer account state at the latest validated ledger. */
+  /** Reads payer and signer account state; may be called concurrently (see {@link FetchAccountState}). */
   fetchAccountState: FetchAccountState;
   /** Latest validated ledger index; enables the `LastLedgerSequence` upper-bound check. */
   validatedLedgerIndex?: number;
@@ -337,8 +347,10 @@ export async function verifyExactPayload(
     const forMulti: Record<string, unknown> = { ...tx, SigningPubKey: "" };
     delete forMulti.Signers;
     delete forMulti.TxnSignature;
+    // Phase 1: local checks only (shape, duplicates, SignerList membership,
+    // signature), in signer order. No ledger lookups until all of them pass.
     const seen = new Set<string>();
-    let total = 0;
+    const checked: Array<{ account: string; pub: string; weight: number }> = [];
     for (const entry of signers!) {
       const s = entry.Signer;
       const sa = s?.Account;
@@ -372,17 +384,28 @@ export async function verifyExactPayload(
       }
       if (!valid)
         fail("multisig_signature_invalid", `invalid signature from ${sa}`);
-      await assertSigningKeyAuthorized(
-        params.fetchAccountState,
-        network,
-        sa,
-        pub,
-        { code: "multisig_signer_not_authorized" },
-      );
-      total += weight;
+      checked.push({ account: sa, pub, weight });
     }
+    // Quorum needs no ledger data: reject before spending any lookups.
+    const total = checked.reduce((sum, c) => sum + c.weight, 0);
     if (total < payer.signerList.quorum)
       fail("multisig_quorum_not_met", "signer weights below quorum");
+    // Phase 2: key authorization needs each signer's account state. Start all
+    // lookups at once, then await them in signer order: the first failure in
+    // that order is thrown as soon as it and the lookups before it settle,
+    // without waiting for later ones.
+    const pending = checked.map((c) =>
+      assertSigningKeyAuthorized(
+        params.fetchAccountState,
+        network,
+        c.account,
+        c.pub,
+        { code: "multisig_signer_not_authorized" },
+      ),
+    );
+    // Later rejections are superseded by the one thrown; keep them handled.
+    for (const p of pending) p.catch(() => {});
+    for (const p of pending) await p;
   } else {
     const pub = tx.SigningPubKey;
     const sig = tx.TxnSignature;
