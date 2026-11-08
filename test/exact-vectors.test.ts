@@ -10,7 +10,7 @@ import {
 import type { PaymentRequirements } from "../src/index.js";
 import {
   VECTORS_PATH,
-  buildVectors,
+  renderVectors,
 } from "../scripts/gen-exact-multisig-vectors.js";
 
 interface VectorFile {
@@ -26,13 +26,14 @@ interface VectorFile {
   }>;
 }
 
-const vectors = JSON.parse(await readFile(VECTORS_PATH, "utf8")) as VectorFile;
+const committed = await readFile(VECTORS_PATH, "utf8");
+const vectors = JSON.parse(committed) as VectorFile;
 
 test("exact multisig vectors are reproducible from their generator", () => {
   // Regenerating must give the committed file exactly: fixed seeds and
   // deterministic ed25519 signatures. Run `pnpm vectors:exact-multisig` after
   // an intentional change.
-  assert.deepEqual(buildVectors(), vectors);
+  assert.equal(renderVectors(), committed);
 });
 
 for (const c of vectors.cases) {
@@ -50,7 +51,15 @@ for (const c of vectors.cases) {
       assert.equal(r.multisig, true);
       return;
     }
-    const { code } = c.expect;
+    const { code, specIdentifier } = c.expect;
+    // Spec identifiers exist for the multisig_* codes and are exactly
+    // "invalid_exact_xrpl_payload_" + code; other codes have none.
+    assert.equal(
+      specIdentifier,
+      code.startsWith("multisig_")
+        ? `invalid_exact_xrpl_payload_${code}`
+        : undefined,
+    );
     await assert.rejects(run, (e: unknown) => {
       assert(e instanceof ExactVerificationError, String(e));
       assert.equal(e.code, code, `${c.description}: ${e.message}`);

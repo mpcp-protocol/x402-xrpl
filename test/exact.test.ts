@@ -1,17 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  encode,
-  encodeForSigning,
-  encodeForMultisigning,
-} from "ripple-binary-codec";
-import {
-  deriveAddress,
-  deriveKeypair,
-  generateSeed,
-  sign,
-} from "ripple-keypairs";
-import { decodeAccountID } from "ripple-address-codec";
+import { encode, encodeForSigning } from "ripple-binary-codec";
+import { sign } from "ripple-keypairs";
 
 import {
   ExactVerificationError,
@@ -27,23 +17,15 @@ import {
   type PaymentRequirements,
   type XrplPaymentTransaction,
 } from "../src/index.js";
-
-interface Wallet {
-  address: string;
-  publicKey: string;
-  privateKey: string;
-}
-function wallet(seed = generateSeed({ algorithm: "ed25519" })): Wallet {
-  const kp = deriveKeypair(seed);
-  return {
-    address: deriveAddress(kp.publicKey),
-    publicKey: kp.publicKey,
-    privateKey: kp.privateKey,
-  };
-}
+import {
+  byAccountId,
+  multiSigned,
+  wallet,
+  type Tx,
+  type Wallet,
+} from "./support/multisig.js";
 
 const LEDGER = 100;
-type Tx = Record<string, unknown>;
 
 function baseTx(from: string, to: string, over: Partial<Tx> = {}): Tx {
   return {
@@ -62,31 +44,6 @@ function singleSigned(tx: Tx, w: Wallet): string {
   const TxnSignature = sign(encodeForSigning(signing), w.privateKey);
   return encode({ ...signing, TxnSignature });
 }
-/** Orders wallets by account ID, the order rippled requires for `Signers`. */
-function byAccountId(a: Wallet, b: Wallet): number {
-  return Buffer.compare(
-    Buffer.from(decodeAccountID(a.address)),
-    Buffer.from(decodeAccountID(b.address)),
-  );
-}
-/** Multisigns `tx`; sorts `Signers` by account ID like xrpl.js unless `keepOrder`. */
-function multiSigned(
-  tx: Tx,
-  signers: Wallet[],
-  { keepOrder = false }: { keepOrder?: boolean } = {},
-): string {
-  const base = { ...tx, SigningPubKey: "" };
-  const ordered = keepOrder ? signers : [...signers].sort(byAccountId);
-  const Signers = ordered.map((s) => ({
-    Signer: {
-      Account: s.address,
-      SigningPubKey: s.publicKey,
-      TxnSignature: sign(encodeForMultisigning(base, s.address), s.privateKey),
-    },
-  }));
-  return encode({ ...base, Signers });
-}
-
 const payTo = wallet().address;
 const reqXrp = (extra: Record<string, unknown> = {}): PaymentRequirements => ({
   scheme: "exact",

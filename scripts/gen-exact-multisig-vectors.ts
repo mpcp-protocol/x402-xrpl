@@ -9,17 +9,22 @@
  *   pnpm vectors:exact-multisig
  */
 import { createHash } from "node:crypto";
+import { realpathSync } from "node:fs";
 import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { decode, encode, encodeForMultisigning } from "ripple-binary-codec";
+import { decode, encode } from "ripple-binary-codec";
+import { generateSeed } from "ripple-keypairs";
+
+import type { XrplAccountState } from "../src/exact.js";
 import {
-  deriveAddress,
-  deriveKeypair,
-  generateSeed,
-  sign,
-} from "ripple-keypairs";
-import { decodeAccountID } from "ripple-address-codec";
+  byAccountId,
+  multiSigned as multiSign,
+  wallet,
+  type SignerSpec,
+  type Tx,
+  type Wallet,
+} from "../test/support/multisig.js";
 
 export const VECTORS_PATH = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -28,59 +33,29 @@ export const VECTORS_PATH = path.join(
   "exact_multisig_vectors.json",
 );
 
-interface Wallet {
-  label: string;
-  address: string;
-  publicKey: string;
-  privateKey: string;
-}
-
-/** Test-only wallet from a fixed seed. Never use these keys for real funds. */
-function walletFromSeed(label: string, seed: string): Wallet {
-  const kp = deriveKeypair(seed);
-  return {
-    label,
-    address: deriveAddress(kp.publicKey),
-    publicKey: kp.publicKey,
-    privateKey: kp.privateKey,
-  };
-}
 /** Test-only wallet whose seed entropy is sha256(label), truncated to 16 bytes. */
-function wallet(label: string): Wallet {
+function fixedWallet(label: string): Wallet {
   const entropy = createHash("sha256")
     .update(`x402-xrpl exact multisig vector: ${label}`)
     .digest()
     .subarray(0, 16);
-  return walletFromSeed(
-    label,
+  return wallet(
     generateSeed({ entropy: new Uint8Array(entropy), algorithm: "ed25519" }),
-  );
-}
-function byAccountId(a: Wallet, b: Wallet): number {
-  return Buffer.compare(
-    Buffer.from(decodeAccountID(a.address)),
-    Buffer.from(decodeAccountID(b.address)),
   );
 }
 
 const LEDGER = 1000;
-const payer = wallet("payer");
-const merchant = wallet("merchant");
-const s1 = wallet("signer-1");
-const s2 = wallet("signer-2");
-const s3 = wallet("signer-3");
-const outsider = wallet("outsider");
-const regularKeyHolder = wallet("signer-2-regular-key");
+const payer = fixedWallet("payer");
+const merchant = fixedWallet("merchant");
+const s1 = fixedWallet("signer-1");
+const s2 = fixedWallet("signer-2");
+const s3 = fixedWallet("signer-3");
+const outsider = fixedWallet("outsider");
+const regularKeyHolder = fixedWallet("signer-2-regular-key");
 // A pair whose address-string order and account-ID order disagree:
 // as strings rMwCk… < rpvva…, but by account ID rpvva… comes first.
-const strM = walletFromSeed(
-  "string-order-first",
-  "sEdSJHS4oiAdz7w2X2ni1gFiihccMfL",
-);
-const strP = walletFromSeed(
-  "account-id-first",
-  "sEdSJHS4oiAdz7w2X2ni1gFiiN7Jpvj",
-);
+const strM = wallet("sEdSJHS4oiAdz7w2X2ni1gFiihccMfL"); // rMwCk9x2…
+const strP = wallet("sEdSJHS4oiAdz7w2X2ni1gFiiN7Jpvj"); // rpvvavrQ…
 
 const requirements = {
   scheme: "exact",
@@ -92,7 +67,7 @@ const requirements = {
   extra: { areFeesSponsored: false },
 };
 
-function baseTx(over: Record<string, unknown> = {}): Record<string, unknown> {
+function baseTx(over: Tx = {}): Tx {
   return {
     TransactionType: "Payment",
     Account: payer.address,
@@ -105,67 +80,15 @@ function baseTx(over: Record<string, unknown> = {}): Record<string, unknown> {
   };
 }
 
-/** Multisigns `tx`. Sorts Signers by account ID (as xrpl.js does) unless `keepOrder`. */
+/** Multisigns the base transaction (see test/support/multisig.ts). */
 function multiSigned(
-  signers: Wallet[],
-  { tx = baseTx(), keepOrder = false } = {},
+  signers: SignerSpec[],
+  opts: { keepOrder?: boolean } = {},
 ): string {
-  const unsigned = { ...tx, SigningPubKey: "" };
-  const ordered = keepOrder ? signers : [...signers].sort(byAccountId);
-  const Signers = ordered.map((w) => ({
-    Signer: {
-      Account: w.address,
-      SigningPubKey: w.publicKey,
-      TxnSignature: sign(
-        encodeForMultisigning(unsigned as never, w.address),
-        w.privateKey,
-      ),
-    },
-  }));
-  return encode({ ...unsigned, Signers } as never);
-}
-/** Signs with `signers[i]`'s key but records the signature under `as[i]`'s account. */
-function multiSignedAs(signer: Wallet, as: Wallet, others: Wallet[]): string {
-  const unsigned = { ...baseTx(), SigningPubKey: "" };
-  const entries = [
-    {
-      Account: as.address,
-      SigningPubKey: signer.publicKey,
-      TxnSignature: sign(
-        encodeForMultisigning(unsigned as never, as.address),
-        signer.privateKey,
-      ),
-    },
-    ...others.map((w) => ({
-      Account: w.address,
-      SigningPubKey: w.publicKey,
-      TxnSignature: sign(
-        encodeForMultisigning(unsigned as never, w.address),
-        w.privateKey,
-      ),
-    })),
-  ].sort((a, b) =>
-    Buffer.compare(
-      Buffer.from(decodeAccountID(a.Account)),
-      Buffer.from(decodeAccountID(b.Account)),
-    ),
-  );
-  return encode({
-    ...unsigned,
-    Signers: entries.map((Signer) => ({ Signer })),
-  } as never);
+  return multiSign(baseTx(), signers, opts);
 }
 
-type AccountState = {
-  exists: boolean;
-  sequence?: number;
-  masterDisabled?: boolean;
-  regularKey?: string | null;
-  signerList?: {
-    quorum: number;
-    signers: { account: string; weight: number }[];
-  } | null;
-};
+type AccountState = XrplAccountState;
 const funded = (over: Partial<AccountState> = {}): AccountState => ({
   exists: true,
   masterDisabled: false,
@@ -260,7 +183,9 @@ export function buildVectors() {
     ...(decode(multiSigned([s1, s2])) as Record<string, unknown>),
     Fee: "31",
   } as never);
-  const thirtyThree = Array.from({ length: 33 }, (_, i) => wallet(`many-${i}`));
+  const thirtyThree = Array.from({ length: 33 }, (_, i) =>
+    fixedWallet(`many-${i}`),
+  );
   const unfunded = states();
   delete unfunded[s2.address];
   const strPairStates = states({
@@ -309,7 +234,7 @@ export function buildVectors() {
       "multisig_signer_regular_key",
       "A signer with its master key disabled signs with its RegularKey: verifies",
       "§10.1.3 (RegularKey authorizes)",
-      multiSignedAs(regularKeyHolder, s2, [s1]),
+      multiSigned([s1, { as: s2.address, key: regularKeyHolder }]),
       states({
         [s2.address]: funded({
           masterDisabled: true,
@@ -360,6 +285,27 @@ export function buildVectors() {
       "multisig_signer_not_authorized",
       multiSigned([s1, s2]),
       states({ [s2.address]: funded({ masterDisabled: true }) }),
+    ),
+    rejects(
+      "multisig_unfunded_signer_wrong_key",
+      "A signer account that does not exist on the ledger signs with a key that is not its own master key",
+      "§10.1.3 (signer account need not exist)",
+      "multisig_signer_not_authorized",
+      multiSigned([s1, { as: s2.address, key: outsider }]),
+      unfunded,
+    ),
+    rejects(
+      "multisig_malformed_signer_entry",
+      "A Signer entry has no TxnSignature",
+      "§10.1.3",
+      "multisig_signature_invalid",
+      (() => {
+        const tx = decode(multiSigned([s1, s2])) as {
+          Signers: { Signer: Record<string, unknown> }[];
+        };
+        delete tx.Signers[1].Signer.TxnSignature;
+        return encode(tx as never);
+      })(),
     ),
     rejects(
       "multisig_payer_not_found",
@@ -435,10 +381,18 @@ export function buildVectors() {
   };
 }
 
+/** The exact text written to VECTORS_PATH. */
+export function renderVectors(): string {
+  return JSON.stringify(buildVectors(), null, 2) + "\n";
+}
+
+// Resolve symlinks on both sides (e.g. /tmp -> /private/tmp on macOS), or a
+// direct run through a symlinked path would silently write nothing.
 const isMain =
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] !== undefined &&
+  realpathSync(process.argv[1]) ===
+    realpathSync(fileURLToPath(import.meta.url));
 if (isMain) {
-  await writeFile(VECTORS_PATH, JSON.stringify(buildVectors(), null, 2) + "\n");
+  await writeFile(VECTORS_PATH, renderVectors());
   console.log(`wrote ${path.relative(process.cwd(), VECTORS_PATH)}`);
 }

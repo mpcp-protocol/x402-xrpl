@@ -553,6 +553,108 @@
       }
     },
     {
+      "id": "multisig_unfunded_signer_wrong_key",
+      "description": "A signer account that does not exist on the ledger signs with a key that is not its own master key",
+      "specRule": "§10.1.3 (signer account need not exist)",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321EDB3E0E0F9B5109960063BFEF73E8325EAAEC8639C35B80E0FA2B992ACBC381CF674407C9713CE75323E6AF093EE1EEE25E215CC6D8AA3DF3D8189963812C43D3BEFF0994DE48BD92E83F00BD77129154DDF79A6E3383A0CF781C1AC7676730A2CE50C811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signer_not_authorized",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signer_not_authorized"
+      }
+    },
+    {
+      "id": "multisig_malformed_signer_entry",
+      "description": "A Signer entry has no TxnSignature",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signature_invalid",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signature_invalid"
+      }
+    },
+    {
       "id": "multisig_payer_not_found",
       "description": "The payer account does not exist at the validated ledger",
       "specRule": "§10.1.2",
