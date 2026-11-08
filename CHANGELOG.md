@@ -13,7 +13,7 @@
   to the new codes.
 - Relicensed from MIT to Apache-2.0.
 
-## 0.3.0 (unreleased)
+## 0.3.0 (2026-10-12)
 
 Adds the standard `exact` scheme and the x402 v2 HTTP envelope, so engagement
 accounts (and any multisig payer) can be paid through an interoperable flow —
@@ -45,7 +45,7 @@ built in. See [docs/SPEC-exact.md](docs/SPEC-exact.md).
   scheme. `X-PAYMENT-RECEIPT` still works and is marked deprecated in favour of
   the v2 envelope headers.
 
-## 0.2.0 (unreleased)
+## 0.2.0 (not published; shipped in 0.3.0)
 
 ### Security
 
