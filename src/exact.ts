@@ -19,6 +19,7 @@ import {
   encodeForMultisigning,
 } from "ripple-binary-codec";
 import { verify as kpVerify, deriveAddress } from "ripple-keypairs";
+import { decodeAccountID } from "ripple-address-codec";
 import { canonicalNetwork } from "./index.js";
 import type { PaymentRequirements } from "./envelope.js";
 
@@ -91,6 +92,19 @@ export type FetchAccountState = (
 ) => Promise<XrplAccountState | null>;
 
 const PARTIAL_PAYMENT_FLAG = 0x00020000;
+/**
+ * Most `Signers` entries a multisigned transaction may carry (rippled limit
+ * with the ExpandedSignerList amendment). Networks without that amendment cap
+ * a SignerList at 8 accounts, so extra signers there already fail the
+ * SignerList membership check.
+ */
+const MAX_MULTISIG_SIGNERS = 32;
+
+/** Compares two account IDs as unsigned 160-bit numbers, the order rippled requires for `Signers`. */
+function compareAccountIds(a: Uint8Array, b: Uint8Array): number {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
 
 export interface VerifyExactParams {
   requirements: PaymentRequirements;
@@ -333,6 +347,46 @@ export async function verifyExactPayload(
         "SigningPubKey must be empty for a multisigned transaction",
       );
     }
+    if (signers!.length > MAX_MULTISIG_SIGNERS) {
+      fail(
+        "invalid_transaction",
+        `Signers has ${signers!.length} entries; at most ${MAX_MULTISIG_SIGNERS} allowed`,
+      );
+    }
+    // Structural pass: no ledger data or signature work. Each Signer entry
+    // is well-formed, is not the payer, and Signers is strictly ascending by
+    // account ID (rippled's order; not the address string order), which also
+    // rules out duplicates.
+    const entries: Array<{ account: string; pub: string; sig: string }> = [];
+    let prevId: Uint8Array | undefined;
+    for (const entry of signers!) {
+      const s = entry.Signer;
+      const sa = s?.Account;
+      const pub = s?.SigningPubKey;
+      const sig = s?.TxnSignature;
+      if (
+        typeof sa !== "string" ||
+        typeof pub !== "string" ||
+        typeof sig !== "string"
+      ) {
+        fail("multisig_signature_invalid", "malformed Signer entry");
+      }
+      if (sa === account)
+        fail(
+          "invalid_transaction",
+          "the payer account cannot sign its own multisigned transaction",
+        );
+      const id = decodeAccountID(sa);
+      if (prevId) {
+        const order = compareAccountIds(prevId, id);
+        if (order === 0)
+          fail("multisig_signer_not_authorized", "duplicate signer");
+        if (order > 0)
+          fail("invalid_transaction", "Signers must be sorted by account ID");
+      }
+      prevId = id;
+      entries.push({ account: sa, pub, sig });
+    }
     if (!payer || !payer.exists)
       fail("multisig_account_not_found", "payer account not found on ledger");
     if (!payer.signerList || payer.signerList.signers.length === 0) {
@@ -347,25 +401,10 @@ export async function verifyExactPayload(
     const forMulti: Record<string, unknown> = { ...tx, SigningPubKey: "" };
     delete forMulti.Signers;
     delete forMulti.TxnSignature;
-    // Phase 1: local checks only (shape, duplicates, SignerList membership,
-    // signature), in signer order. No ledger lookups until all of them pass.
-    const seen = new Set<string>();
+    // Phase 1: SignerList membership and signatures, in signer order. No
+    // ledger lookups until all of them pass.
     const checked: Array<{ account: string; pub: string; weight: number }> = [];
-    for (const entry of signers!) {
-      const s = entry.Signer;
-      const sa = s?.Account;
-      const pub = s?.SigningPubKey;
-      const sig = s?.TxnSignature;
-      if (
-        typeof sa !== "string" ||
-        typeof pub !== "string" ||
-        typeof sig !== "string"
-      ) {
-        fail("multisig_signature_invalid", "malformed Signer entry");
-      }
-      if (seen.has(sa))
-        fail("multisig_signer_not_authorized", "duplicate signer");
-      seen.add(sa);
+    for (const { account: sa, pub, sig } of entries) {
       const weight = weights.get(sa);
       if (weight === undefined)
         fail(

@@ -73,6 +73,7 @@
     "typescript": "^5.4.0"
   },
   "dependencies": {
+    "ripple-address-codec": "5.0.1",
     "ripple-binary-codec": "2.11.0",
     "ripple-keypairs": "3.1.0"
   }

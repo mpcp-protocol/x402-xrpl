@@ -1,5 +1,30 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
+- Multisig verification in the `exact` scheme now requires `Signers` to be
+  sorted by account ID ascending (the 160-bit account ID, not the `r…`
+  address string), as the x402 XRPL `exact` spec (§10.1) and rippled do.
+  Before, an unsorted array passed `verifyExactPayload` and then failed on the
+  ledger. It is now rejected with `invalid_transaction`.
+
+### Changed
+
+- Two more §10.1 rules are now checked explicitly. Payloads breaking them were
+  already rejected, through the SignerList membership check, but now fail
+  earlier and with a structural error:
+  - More than 32 `Signers` entries: `invalid_transaction` (previously
+    `multisig_signer_not_authorized`).
+  - The payer account among its own signers: `invalid_transaction`.
+- All structural checks on `Signers` (entry shape, payer self-signing,
+  order, duplicates, count) run before any signature verification or ledger
+  lookup.
+- New dependency: `ripple-address-codec` (already installed through
+  `ripple-binary-codec` and `ripple-keypairs`), used to decode signer accounts
+  to account IDs for the ordering check.
+
 ## 0.5.0 (2026-11-08)
 
 ### Changed

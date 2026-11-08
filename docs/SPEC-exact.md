@@ -65,7 +65,7 @@ Offline, against the payer's state at the latest validated ledger. No submission
 8. Sequencing: `sequence` mode forbids `TicketSequence` and (when account state is supplied) requires `Sequence` to match; `ticketSequence` mode requires `Sequence == 0` and a `TicketSequence` that is an available ticket.
 9. **Signatures:**
    - **Single-signed:** verify `TxnSignature` over the signing data with `SigningPubKey`; the key MUST be the account's master key (not disabled) or its regular key.
-   - **Multisigned** (`Signers` present, `SigningPubKey` empty): for each signer, verify `TxnSignature` over the multisigning data; the signer MUST be on the payer's `SignerList`, with no duplicates; each signer's key MUST be that signer account's master (not disabled) or regular key; the summed weights MUST be `>= SignerQuorum`.
+   - **Multisigned** (`Signers` present, `SigningPubKey` empty): `Signers` MUST have at most 32 entries, sorted by account ID ascending (the 160-bit account ID, not the `r…` address string), and MUST NOT include the payer account. For each signer, verify `TxnSignature` over the multisigning data; the signer MUST be on the payer's `SignerList`, with no duplicates; each signer's key MUST be that signer account's master (not disabled) or regular key; the summed weights MUST be `>= SignerQuorum`.
 
 A validated facilitator never serves a resource on `/verify` for a payment that would fail at submission. `simulate` cannot replace step 9: signature fields are stripped before simulation.
 
