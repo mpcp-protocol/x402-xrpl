@@ -37,8 +37,10 @@ export type ExactErrorCode =
   | "fee_too_high"
   | "signature_invalid"
   | "signer_not_authorized"
-  | "quorum_not_met"
-  | "account_not_found"
+  | "multisig_signer_not_authorized"
+  | "multisig_quorum_not_met"
+  | "multisig_signature_invalid"
+  | "multisig_account_not_found"
   | "tx_failed"
   | "replay_detected";
 
@@ -322,10 +324,10 @@ export async function verifyExactPayload(
       );
     }
     if (!payer || !payer.exists)
-      fail("account_not_found", "payer account not found on ledger");
+      fail("multisig_account_not_found", "payer account not found on ledger");
     if (!payer.signerList || payer.signerList.signers.length === 0) {
       fail(
-        "signer_not_authorized",
+        "multisig_signer_not_authorized",
         "payer has no SignerList; multisig not authorized",
       );
     }
@@ -347,13 +349,17 @@ export async function verifyExactPayload(
         typeof pub !== "string" ||
         typeof sig !== "string"
       ) {
-        fail("signature_invalid", "malformed Signer entry");
+        fail("multisig_signature_invalid", "malformed Signer entry");
       }
-      if (seen.has(sa)) fail("signer_not_authorized", "duplicate signer");
+      if (seen.has(sa))
+        fail("multisig_signer_not_authorized", "duplicate signer");
       seen.add(sa);
       const weight = weights.get(sa);
       if (weight === undefined)
-        fail("signer_not_authorized", `signer ${sa} is not on the SignerList`);
+        fail(
+          "multisig_signer_not_authorized",
+          `signer ${sa} is not on the SignerList`,
+        );
       let valid = false;
       try {
         valid = kpVerify(
@@ -364,17 +370,19 @@ export async function verifyExactPayload(
       } catch {
         valid = false;
       }
-      if (!valid) fail("signature_invalid", `invalid signature from ${sa}`);
+      if (!valid)
+        fail("multisig_signature_invalid", `invalid signature from ${sa}`);
       await assertSigningKeyAuthorized(
         params.fetchAccountState,
         network,
         sa,
         pub,
+        { code: "multisig_signer_not_authorized" },
       );
       total += weight;
     }
     if (total < payer.signerList.quorum)
-      fail("quorum_not_met", "signer weights below quorum");
+      fail("multisig_quorum_not_met", "signer weights below quorum");
   } else {
     const pub = tx.SigningPubKey;
     const sig = tx.TxnSignature;
@@ -403,7 +411,7 @@ export async function verifyExactPayload(
       network,
       account,
       pub,
-      payer,
+      { known: payer },
     );
   }
 
@@ -422,19 +430,25 @@ async function assertSigningKeyAuthorized(
   network: string,
   account: string,
   signingPubKey: string,
-  known?: XrplAccountState | null,
+  opts: {
+    /** Account state already fetched by the caller; skips the lookup. */
+    known?: XrplAccountState | null;
+    /** Error code to fail with (multisig callers pass their own). */
+    code?: ExactErrorCode;
+  } = {},
 ): Promise<void> {
+  const { known, code = "signer_not_authorized" } = opts;
   const signAddr = deriveAddress(signingPubKey);
   const state = known ?? (await fetchAccountState(network, account));
   if (!state || !state.exists) {
     // Unfunded signer accounts can still sign with their master key pair.
     if (signAddr !== account)
-      fail("signer_not_authorized", `key for ${account} is not its master key`);
+      fail(code, `key for ${account} is not its master key`);
     return;
   }
   if (state.regularKey && state.regularKey === signAddr) return;
   if (signAddr === account && !state.masterDisabled) return;
-  fail("signer_not_authorized", `signing key is not authorized for ${account}`);
+  fail(code, `signing key is not authorized for ${account}`);
 }
 
 // ── Post-submission confirmation ─────────────────────────────────────────────
@@ -497,7 +511,7 @@ export async function confirmExactSettlement(
 
   const invoiceId = requirements.extra?.invoiceId;
   if (typeof invoiceId === "string" && invoiceId.length > 0) {
-    const txInvoice = (tx as { InvoiceID?: unknown }).InvoiceID;
+    const txInvoice = tx.InvoiceID;
     if (
       typeof txInvoice !== "string" ||
       txInvoice.toUpperCase() !== invoiceIdToField(invoiceId)

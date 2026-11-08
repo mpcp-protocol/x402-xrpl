@@ -1,9 +1,9 @@
 {
   "name": "x402-xrpl-settlement-adapter",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "private": false,
   "description": "TypeScript x402 v2 settlement adapter for XRPL: issue challenges, build payment memos, verify on-ledger settlement, replay-safe.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": [
     "x402",
     "x402 v2",
@@ -50,14 +50,19 @@
     "docs",
     "README.md",
     "LICENSE",
+    "NOTICE",
     "CONFORMANCE.md"
   ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "build": "tsup",
     "dev": "tsx src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "tsx --test test/**/*.test.ts",
+    "test": "tsx --test \"test/**/*.test.ts\"",
+    "typecheck": "tsc -p tsconfig.typecheck.json",
     "prepublishOnly": "pnpm build"
   },
   "devDependencies": {

@@ -13,11 +13,11 @@ envelope is in [`./envelope`](../src/envelope.ts).
 
 x402 v2 headers (base64-encoded JSON):
 
-| Header | Direction | Body |
-| --- | --- | --- |
-| `PAYMENT-REQUIRED` | 402 response | `PaymentRequired` (`accepts: PaymentRequirements[]`) |
-| `PAYMENT-SIGNATURE` | retry request | `PaymentPayload` (`accepted`, `payload`) |
-| `PAYMENT-RESPONSE` | success response | `SettlementResponse` |
+| Header              | Direction        | Body                                                 |
+| ------------------- | ---------------- | ---------------------------------------------------- |
+| `PAYMENT-REQUIRED`  | 402 response     | `PaymentRequired` (`accepts: PaymentRequirements[]`) |
+| `PAYMENT-SIGNATURE` | retry request    | `PaymentPayload` (`accepted`, `payload`)             |
+| `PAYMENT-RESPONSE`  | success response | `SettlementResponse`                                 |
 
 `PaymentRequirements` for `exact`:
 
@@ -29,7 +29,11 @@ x402 v2 headers (base64-encoded JSON):
   "asset": "XRP",
   "payTo": "rMerchant...",
   "maxTimeoutSeconds": 60,
-  "extra": { "areFeesSponsored": false, "invoiceId": "01JAB...", "issuer": "rIssuer..." }
+  "extra": {
+    "areFeesSponsored": false,
+    "invoiceId": "01JAB...",
+    "issuer": "rIssuer..."
+  }
 }
 ```
 
@@ -81,7 +85,11 @@ else the tx hash).
 `destination_mismatch`, `amount_mismatch`, `asset_mismatch`, `forbidden_field`,
 `invoice_mismatch`, `destination_tag_mismatch`, `sequencing_invalid`,
 `expiry_invalid`, `fee_too_high`, `signature_invalid`, `signer_not_authorized`,
-`quorum_not_met`, `account_not_found`, `tx_failed`, `replay_detected`.
+`tx_failed`, `replay_detected`.
+
+Multisig verification reports its own codes: `multisig_signer_not_authorized`,
+`multisig_quorum_not_met`, `multisig_signature_invalid`,
+`multisig_account_not_found`.
 
 ## 5. Flow
 

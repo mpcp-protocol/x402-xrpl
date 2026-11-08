@@ -14,7 +14,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-XRP-OK", "paymentId": "VEC-XRP-OK" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-XRP-OK",
+            "paymentId": "VEC-XRP-OK"
+          },
           "txByHash": {
             "TX-XRP-OK": {
               "validated": true,
@@ -23,7 +27,10 @@
               "Destination": "rDEST-A",
               "Amount": "2500000",
               "memoPaymentId": "VEC-XRP-OK",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "2500000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "2500000"
+              }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -43,18 +50,30 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-IOU-OK", "paymentId": "VEC-IOU-OK" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-IOU-OK",
+            "paymentId": "VEC-IOU-OK"
+          },
           "txByHash": {
             "TX-IOU-OK": {
               "validated": true,
               "TransactionType": "Payment",
               "Account": "rPAYER-B",
               "Destination": "rDEST-B",
-              "Amount": { "currency": "RLUSD", "issuer": "rISSUER", "value": "10.25" },
+              "Amount": {
+                "currency": "RLUSD",
+                "issuer": "rISSUER",
+                "value": "10.25"
+              },
               "memoPaymentId": "VEC-IOU-OK",
               "meta": {
                 "TransactionResult": "tesSUCCESS",
-                "delivered_amount": { "currency": "RLUSD", "issuer": "rISSUER", "value": "10.25" }
+                "delivered_amount": {
+                  "currency": "RLUSD",
+                  "issuer": "rISSUER",
+                  "value": "10.25"
+                }
               }
             }
           },
@@ -75,7 +94,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-REPLAY-SAME", "paymentId": "VEC-REPLAY-SAME" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-REPLAY-SAME",
+            "paymentId": "VEC-REPLAY-SAME"
+          },
           "txByHash": {
             "TX-REPLAY-SAME": {
               "validated": true,
@@ -84,13 +107,20 @@
               "Destination": "rDEST-C",
               "Amount": "1000000",
               "memoPaymentId": "VEC-REPLAY-SAME",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "ok": true, "idempotent": false }
         },
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-REPLAY-SAME", "paymentId": "VEC-REPLAY-SAME" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-REPLAY-SAME",
+            "paymentId": "VEC-REPLAY-SAME"
+          },
           "txByHash": {
             "TX-REPLAY-SAME": {
               "validated": true,
@@ -99,7 +129,10 @@
               "Destination": "rDEST-C",
               "Amount": "1000000",
               "memoPaymentId": "VEC-REPLAY-SAME",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "ok": true, "idempotent": true }
@@ -119,7 +152,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-REPLAY-A", "paymentId": "VEC-REPLAY-DIFF" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-REPLAY-A",
+            "paymentId": "VEC-REPLAY-DIFF"
+          },
           "txByHash": {
             "TX-REPLAY-A": {
               "validated": true,
@@ -128,13 +165,20 @@
               "Destination": "rDEST-D",
               "Amount": "1000000",
               "memoPaymentId": "VEC-REPLAY-DIFF",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "ok": true, "idempotent": false }
         },
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-REPLAY-B", "paymentId": "VEC-REPLAY-DIFF" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-REPLAY-B",
+            "paymentId": "VEC-REPLAY-DIFF"
+          },
           "txByHash": {
             "TX-REPLAY-B": {
               "validated": true,
@@ -143,7 +187,10 @@
               "Destination": "rDEST-D",
               "Amount": "1000000",
               "memoPaymentId": "VEC-REPLAY-DIFF",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "errorCode": "replay_detected" }
@@ -163,7 +210,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-WRONG-MEMO", "paymentId": "VEC-MEMO" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-WRONG-MEMO",
+            "paymentId": "VEC-MEMO"
+          },
           "txByHash": {
             "TX-WRONG-MEMO": {
               "validated": true,
@@ -172,7 +223,10 @@
               "Destination": "rDEST-E",
               "Amount": "2500000",
               "memoPaymentId": "VEC-MEMO-OTHER",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "2500000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "2500000"
+              }
             }
           },
           "expect": { "errorCode": "invalid_memo" }
@@ -192,7 +246,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-WRONG-AMOUNT", "paymentId": "VEC-AMOUNT" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-WRONG-AMOUNT",
+            "paymentId": "VEC-AMOUNT"
+          },
           "txByHash": {
             "TX-WRONG-AMOUNT": {
               "validated": true,
@@ -201,7 +259,10 @@
               "Destination": "rDEST-F",
               "Amount": "2500001",
               "memoPaymentId": "VEC-AMOUNT",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "2500001" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "2500001"
+              }
             }
           },
           "expect": { "errorCode": "invalid_amount" }
@@ -221,7 +282,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-PATHS", "paymentId": "VEC-PATHS" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-PATHS",
+            "paymentId": "VEC-PATHS"
+          },
           "txByHash": {
             "TX-PATHS": {
               "validated": true,
@@ -231,7 +296,10 @@
               "Amount": "3000000",
               "memoPaymentId": "VEC-PATHS",
               "Paths": [{}],
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "3000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "3000000"
+              }
             }
           },
           "expect": { "errorCode": "invalid_asset" }
@@ -251,7 +319,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-PARTIAL", "paymentId": "VEC-PARTIAL" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-PARTIAL",
+            "paymentId": "VEC-PARTIAL"
+          },
           "txByHash": {
             "TX-PARTIAL": {
               "validated": true,
@@ -261,7 +333,10 @@
               "Amount": "3000000",
               "memoPaymentId": "VEC-PARTIAL",
               "Flags": 131072,
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "3000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "3000000"
+              }
             }
           },
           "expect": { "errorCode": "invalid_asset" }
@@ -300,7 +375,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-TEC", "paymentId": "VEC-TEC" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-TEC",
+            "paymentId": "VEC-TEC"
+          },
           "txByHash": {
             "TX-TEC": {
               "validated": true,
@@ -309,7 +388,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-TEC",
-              "meta": { "TransactionResult": "tecUNFUNDED_PAYMENT", "delivered_amount": "0" }
+              "meta": {
+                "TransactionResult": "tecUNFUNDED_PAYMENT",
+                "delivered_amount": "0"
+              }
             }
           },
           "expect": { "errorCode": "tx_failed" }
@@ -329,7 +411,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-NOMETA", "paymentId": "VEC-NOMETA" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-NOMETA",
+            "paymentId": "VEC-NOMETA"
+          },
           "txByHash": {
             "TX-NOMETA": {
               "validated": true,
@@ -357,7 +443,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-DELIV", "paymentId": "VEC-DELIV" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-DELIV",
+            "paymentId": "VEC-DELIV"
+          },
           "txByHash": {
             "TX-DELIV": {
               "validated": true,
@@ -366,7 +456,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-DELIV",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "999999" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "999999"
+              }
             }
           },
           "expect": { "errorCode": "invalid_amount" }
@@ -386,7 +479,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-UNAV", "paymentId": "VEC-UNAV" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-UNAV",
+            "paymentId": "VEC-UNAV"
+          },
           "txByHash": {
             "TX-UNAV": {
               "validated": true,
@@ -395,7 +492,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-UNAV",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "unavailable" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "unavailable"
+              }
             }
           },
           "expect": { "errorCode": "tx_failed" }
@@ -415,7 +515,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-V2", "paymentId": "VEC-V2" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-V2",
+            "paymentId": "VEC-V2"
+          },
           "txByHash": {
             "TX-V2": {
               "validated": true,
@@ -423,7 +527,10 @@
               "Account": "rPAYER-N",
               "Destination": "rDEST-N",
               "memoPaymentId": "VEC-V2",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              },
               "DeliverMax": "1000000"
             }
           },
@@ -444,7 +551,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:mainnet", "txHash": "TX-MAIN", "paymentId": "VEC-MAIN" },
+          "receipt": {
+            "network": "xrpl:mainnet",
+            "txHash": "TX-MAIN",
+            "paymentId": "VEC-MAIN"
+          },
           "txByHash": {
             "TX-MAIN": {
               "validated": true,
@@ -453,7 +564,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-MAIN",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -473,7 +587,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-T1", "paymentId": "VEC-T1" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-T1",
+            "paymentId": "VEC-T1"
+          },
           "txByHash": {
             "TX-T1": {
               "validated": true,
@@ -482,7 +600,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-T1",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "ok": true, "idempotent": false }
@@ -502,7 +623,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:1", "txHash": "TX-MIS", "paymentId": "VEC-MIS" },
+          "receipt": {
+            "network": "xrpl:1",
+            "txHash": "TX-MIS",
+            "paymentId": "VEC-MIS"
+          },
           "txByHash": {
             "TX-MIS": {
               "validated": true,
@@ -511,7 +636,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-MIS",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" }
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              }
             }
           },
           "expect": { "errorCode": "network_mismatch" }
@@ -531,7 +659,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-GRACE", "paymentId": "VEC-GRACE" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-GRACE",
+            "paymentId": "VEC-GRACE"
+          },
           "txByHash": {
             "TX-GRACE": {
               "validated": true,
@@ -540,7 +672,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-GRACE",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              },
               "closeTime": "2029-12-31T23:59:58Z"
             }
           },
@@ -562,7 +697,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-LATE", "paymentId": "VEC-LATE" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-LATE",
+            "paymentId": "VEC-LATE"
+          },
           "txByHash": {
             "TX-LATE": {
               "validated": true,
@@ -571,7 +710,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-LATE",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              },
               "closeTime": "2030-01-01T00:00:05Z"
             }
           },
@@ -593,7 +735,11 @@
       },
       "steps": [
         {
-          "receipt": { "network": "xrpl:testnet", "txHash": "TX-STALE", "paymentId": "VEC-STALE" },
+          "receipt": {
+            "network": "xrpl:testnet",
+            "txHash": "TX-STALE",
+            "paymentId": "VEC-STALE"
+          },
           "txByHash": {
             "TX-STALE": {
               "validated": true,
@@ -602,7 +748,10 @@
               "Destination": "rDEST-N",
               "Amount": "1000000",
               "memoPaymentId": "VEC-STALE",
-              "meta": { "TransactionResult": "tesSUCCESS", "delivered_amount": "1000000" },
+              "meta": {
+                "TransactionResult": "tesSUCCESS",
+                "delivered_amount": "1000000"
+              },
               "closeTime": "2029-12-31T23:59:58Z"
             }
           },

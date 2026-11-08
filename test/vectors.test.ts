@@ -57,7 +57,9 @@ function memoForPaymentId(paymentId: string) {
   ];
 }
 
-function enrichTx(tx: XrplPaymentTransaction & { memoPaymentId?: string }): XrplPaymentTransaction {
+function enrichTx(
+  tx: XrplPaymentTransaction & { memoPaymentId?: string },
+): XrplPaymentTransaction {
   if (tx.memoPaymentId === undefined) {
     return tx;
   }
@@ -69,7 +71,12 @@ function enrichTx(tx: XrplPaymentTransaction & { memoPaymentId?: string }): Xrpl
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const vectorsPath = path.resolve(__dirname, "..", "conformance", "test_vectors.json");
+const vectorsPath = path.resolve(
+  __dirname,
+  "..",
+  "conformance",
+  "test_vectors.json",
+);
 const vectorsDoc = JSON.parse(await readFile(vectorsPath, "utf-8")) as {
   version: string;
   cases: VectorCase[];
@@ -112,7 +119,11 @@ test("shared conformance vectors", async () => {
             }),
           (error: unknown) => {
             assert(error instanceof SettlementVerificationError);
-            assert.equal(error.code, step.expect.errorCode, `${vector.id}: ${vector.description}`);
+            assert.equal(
+              error.code,
+              step.expect.errorCode,
+              `${vector.id}: ${vector.description}`,
+            );
             return true;
           },
         );
@@ -126,7 +137,11 @@ test("shared conformance vectors", async () => {
         replayStore,
         now: step.now !== undefined ? new Date(step.now) : undefined,
       });
-      assert.equal(result.ok, step.expect.ok ?? true, `${vector.id}: ${vector.description}`);
+      assert.equal(
+        result.ok,
+        step.expect.ok ?? true,
+        `${vector.id}: ${vector.description}`,
+      );
       assert.equal(
         result.idempotent,
         step.expect.idempotent ?? false,

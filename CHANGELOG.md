@@ -1,6 +1,30 @@
 # Changelog
 
-## 0.3.0 (unreleased)
+## 0.4.0 (unreleased)
+
+### Changed
+
+- **Breaking:** multisig verification in the `exact` scheme now fails with
+  dedicated error codes — `multisig_signer_not_authorized`,
+  `multisig_quorum_not_met`, `multisig_signature_invalid` and
+  `multisig_account_not_found` — instead of reusing the single-sig codes.
+  Callers that match `signer_not_authorized`, `quorum_not_met`,
+  `signature_invalid` or `account_not_found` on multisig failures must switch
+  to the new codes.
+- **Breaking (types):** `quorum_not_met` and `account_not_found` are removed
+  from `ExactErrorCode`. Only multisig verification returned them, so
+  TypeScript now flags code that still checks for them.
+- `package.json` declares `"engines": { "node": ">=22" }`. The test script
+  relies on Node expanding the glob passed to `--test`, which Node 20 does
+  not do.
+- Relicensed from MIT to Apache-2.0.
+
+### Added
+
+- `XrplPaymentTransaction.InvoiceID` (optional). `confirmExactSettlement`
+  already read it; the field was missing from the type.
+
+## 0.3.0 (2026-10-12)
 
 Adds the standard `exact` scheme and the x402 v2 HTTP envelope, so engagement
 accounts (and any multisig payer) can be paid through an interoperable flow —
@@ -32,7 +56,7 @@ built in. See [docs/SPEC-exact.md](docs/SPEC-exact.md).
   scheme. `X-PAYMENT-RECEIPT` still works and is marked deprecated in favour of
   the v2 envelope headers.
 
-## 0.2.0 (unreleased)
+## 0.2.0 (not published; shipped in 0.3.0)
 
 ### Security
 
