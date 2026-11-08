@@ -1,6 +1,6 @@
 {
-  "version": 1,
-  "description": "Deterministic conformance vectors for multisig verification in the x402 XRPL `exact` scheme (spec §10.1). Each case is verified offline against `accountStates`, keyed by account address. Keys come from fixed test-only seeds; never use them for real funds.",
+  "version": 2,
+  "description": "Deterministic conformance vectors for multisig verification in the x402 XRPL `exact` scheme (spec §10.1). Each case is verified offline against `accountStates`, keyed by account address. Every rejected case names the adapter's error code and its §10.1 spec identifier. Keys come from fixed test-only seeds; never use them for real funds.",
   "requirements": {
     "scheme": "exact",
     "network": "xrpl:1",
@@ -773,7 +773,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -834,7 +835,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -887,7 +889,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -940,7 +943,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -993,7 +997,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     }
   ]
