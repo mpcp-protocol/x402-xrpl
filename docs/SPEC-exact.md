@@ -85,7 +85,7 @@ else the tx hash).
 `destination_mismatch`, `amount_mismatch`, `asset_mismatch`, `forbidden_field`,
 `invoice_mismatch`, `destination_tag_mismatch`, `sequencing_invalid`,
 `expiry_invalid`, `fee_too_high`, `signature_invalid`, `signer_not_authorized`,
-`quorum_not_met`, `account_not_found`, `tx_failed`, `replay_detected`.
+`tx_failed`, `replay_detected`.
 
 Multisig verification reports its own codes: `multisig_signer_not_authorized`,
 `multisig_quorum_not_met`, `multisig_signature_invalid`,

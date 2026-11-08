@@ -141,6 +141,8 @@ export interface XrplPaymentTransaction {
   SendMax?: unknown;
   Paths?: unknown;
   DeliverMin?: unknown;
+  /** 256-bit hex invoice hash; the `exact` scheme binds it to `extra.invoiceId`. */
+  InvoiceID?: string;
   /** Transaction metadata. Required: verification fails closed without it. */
   meta?: XrplTransactionMeta;
   /**

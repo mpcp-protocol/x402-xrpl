@@ -37,8 +37,6 @@ export type ExactErrorCode =
   | "fee_too_high"
   | "signature_invalid"
   | "signer_not_authorized"
-  | "quorum_not_met"
-  | "account_not_found"
   | "multisig_signer_not_authorized"
   | "multisig_quorum_not_met"
   | "multisig_signature_invalid"
@@ -379,8 +377,7 @@ export async function verifyExactPayload(
         network,
         sa,
         pub,
-        undefined,
-        "multisig_signer_not_authorized",
+        { code: "multisig_signer_not_authorized" },
       );
       total += weight;
     }
@@ -414,7 +411,7 @@ export async function verifyExactPayload(
       network,
       account,
       pub,
-      payer,
+      { known: payer },
     );
   }
 
@@ -433,9 +430,14 @@ async function assertSigningKeyAuthorized(
   network: string,
   account: string,
   signingPubKey: string,
-  known?: XrplAccountState | null,
-  code: ExactErrorCode = "signer_not_authorized",
+  opts: {
+    /** Account state already fetched by the caller; skips the lookup. */
+    known?: XrplAccountState | null;
+    /** Error code to fail with (multisig callers pass their own). */
+    code?: ExactErrorCode;
+  } = {},
 ): Promise<void> {
+  const { known, code = "signer_not_authorized" } = opts;
   const signAddr = deriveAddress(signingPubKey);
   const state = known ?? (await fetchAccountState(network, account));
   if (!state || !state.exists) {
@@ -509,7 +511,7 @@ export async function confirmExactSettlement(
 
   const invoiceId = requirements.extra?.invoiceId;
   if (typeof invoiceId === "string" && invoiceId.length > 0) {
-    const txInvoice = (tx as { InvoiceID?: unknown }).InvoiceID;
+    const txInvoice = tx.InvoiceID;
     if (
       typeof txInvoice !== "string" ||
       txInvoice.toUpperCase() !== invoiceIdToField(invoiceId)
