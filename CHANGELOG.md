@@ -7,7 +7,9 @@
 - Deterministic conformance vectors for `exact` multisig verification
   (`conformance/exact_multisig_vectors.json`, 19 cases), following §10.1 of
   the x402 XRPL `exact` spec. Each failing case records the adapter's error
-  code and, where the spec defines one, the proposed spec identifier.
+  code and the proposed spec identifier, including
+  `invalid_exact_xrpl_payload_multisig_signers_malformed` for structural
+  `Signers` failures.
   Regenerate with `pnpm vectors:exact-multisig`. See `CONFORMANCE.md`.
 
 ## 0.5.1 (2026-11-08)

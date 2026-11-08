@@ -773,7 +773,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -834,7 +835,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -887,7 +889,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -940,7 +943,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     },
     {
@@ -993,7 +997,8 @@
       },
       "expect": {
         "ok": false,
-        "code": "invalid_transaction"
+        "code": "invalid_transaction",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signers_malformed"
       }
     }
   ]

@@ -22,7 +22,7 @@ interface VectorFile {
     description: string;
     signedTxBlob: string;
     accountStates: Record<string, XrplAccountState>;
-    expect: { ok: true } | { ok: false; code: string; specIdentifier?: string };
+    expect: { ok: true } | { ok: false; code: string; specIdentifier: string };
   }>;
 }
 
@@ -52,13 +52,18 @@ for (const c of vectors.cases) {
       return;
     }
     const { code, specIdentifier } = c.expect;
-    // Spec identifiers exist for the multisig_* codes and are exactly
-    // "invalid_exact_xrpl_payload_" + code; other codes have none.
+    // Every rejection names its §10.1 identifier: "invalid_exact_xrpl_payload_"
+    // + code for multisig_* codes, and ..._multisig_signers_malformed for the
+    // structural failures the adapter reports as invalid_transaction.
     assert.equal(
       specIdentifier,
-      code.startsWith("multisig_")
-        ? `invalid_exact_xrpl_payload_${code}`
-        : undefined,
+      code === "invalid_transaction"
+        ? "invalid_exact_xrpl_payload_multisig_signers_malformed"
+        : `invalid_exact_xrpl_payload_${code}`,
+    );
+    assert.ok(
+      code === "invalid_transaction" || code.startsWith("multisig_"),
+      `unexpected code ${code}`,
     );
     await assert.rejects(run, (e: unknown) => {
       assert(e instanceof ExactVerificationError, String(e));

@@ -22,8 +22,10 @@ package:
 - Each case has a `signedTxBlob`, the `accountStates` to serve from
   `fetchAccountState` (keyed by address; a missing account does not exist),
   and an `expect`: `{ "ok": true }`, or `{ "ok": false, "code": ... }` with the
-  adapter's error code and, where §10.1 defines one, the proposed spec
-  identifier (`specIdentifier`).
+  adapter's error code and the proposed §10.1 spec identifier
+  (`specIdentifier`). The adapter reports structural `Signers` failures as
+  `invalid_transaction`; their spec identifier is
+  `invalid_exact_xrpl_payload_multisig_signers_malformed`.
 - Cases cover quorum, SignerList membership, signatures, malformed `Signer`
   entries, duplicates, key authorization (master, disabled master,
   RegularKey, and a signer account not on the ledger signing with its own or

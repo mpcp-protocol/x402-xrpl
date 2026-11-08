@@ -121,8 +121,13 @@ function states(
   };
 }
 
-/** Proposed spec identifiers (x402 XRPL exact spec §10.1) for each adapter code. */
+/**
+ * Proposed spec identifier (x402 XRPL exact spec §10.1) for each adapter code
+ * these vectors use. In multisig verification the adapter's
+ * `invalid_transaction` is always a structural `Signers` failure.
+ */
 const SPEC_IDENTIFIER: Record<string, string> = {
+  invalid_transaction: "invalid_exact_xrpl_payload_multisig_signers_malformed",
   multisig_account_not_found:
     "invalid_exact_xrpl_payload_multisig_account_not_found",
   multisig_signer_not_authorized:
@@ -138,7 +143,7 @@ interface Case {
   specRule: string;
   signedTxBlob: string;
   accountStates: Record<string, AccountState>;
-  expect: { ok: true } | { ok: false; code: string; specIdentifier?: string };
+  expect: { ok: true } | { ok: false; code: string; specIdentifier: string };
 }
 
 function ok(
@@ -166,15 +171,14 @@ function rejects(
   accountStates = states(),
 ): Case {
   const specIdentifier = SPEC_IDENTIFIER[code];
+  if (!specIdentifier) throw new Error(`no spec identifier for ${code}`);
   return {
     id,
     description,
     specRule,
     signedTxBlob,
     accountStates,
-    expect: specIdentifier
-      ? { ok: false, code, specIdentifier }
-      : { ok: false, code },
+    expect: { ok: false, code, specIdentifier },
   };
 }
 
