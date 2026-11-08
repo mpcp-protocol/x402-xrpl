@@ -13,11 +13,11 @@ envelope is in [`./envelope`](../src/envelope.ts).
 
 x402 v2 headers (base64-encoded JSON):
 
-| Header | Direction | Body |
-| --- | --- | --- |
-| `PAYMENT-REQUIRED` | 402 response | `PaymentRequired` (`accepts: PaymentRequirements[]`) |
-| `PAYMENT-SIGNATURE` | retry request | `PaymentPayload` (`accepted`, `payload`) |
-| `PAYMENT-RESPONSE` | success response | `SettlementResponse` |
+| Header              | Direction        | Body                                                 |
+| ------------------- | ---------------- | ---------------------------------------------------- |
+| `PAYMENT-REQUIRED`  | 402 response     | `PaymentRequired` (`accepts: PaymentRequirements[]`) |
+| `PAYMENT-SIGNATURE` | retry request    | `PaymentPayload` (`accepted`, `payload`)             |
+| `PAYMENT-RESPONSE`  | success response | `SettlementResponse`                                 |
 
 `PaymentRequirements` for `exact`:
 
@@ -29,7 +29,11 @@ x402 v2 headers (base64-encoded JSON):
   "asset": "XRP",
   "payTo": "rMerchant...",
   "maxTimeoutSeconds": 60,
-  "extra": { "areFeesSponsored": false, "invoiceId": "01JAB...", "issuer": "rIssuer..." }
+  "extra": {
+    "areFeesSponsored": false,
+    "invoiceId": "01JAB...",
+    "issuer": "rIssuer..."
+  }
 }
 ```
 

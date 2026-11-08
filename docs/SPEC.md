@@ -41,10 +41,10 @@ This adapter uses CAIP-2 network identifiers. The reference is the XRPL network 
 ### Supported Networks
 
 | Network | CAIP-2 ID | Accepted alias |
-| --- | --- | --- |
-| Mainnet | `xrpl:0` | `xrpl:mainnet` |
-| Testnet | `xrpl:1` | `xrpl:testnet` |
-| Devnet | `xrpl:2` | `xrpl:devnet` |
+| ------- | --------- | -------------- |
+| Mainnet | `xrpl:0`  | `xrpl:mainnet` |
+| Testnet | `xrpl:1`  | `xrpl:testnet` |
+| Devnet  | `xrpl:2`  | `xrpl:devnet`  |
 
 The `network` field in challenges and receipts **MUST** be one of these identifiers. An alias and its CAIP-2 ID denote the same network and compare equal. `fetchTransaction` receives the canonical CAIP-2 ID.
 
@@ -250,19 +250,19 @@ Given a `challenge` and `receipt`, the server MUST:
 
 ## 11. Error Codes
 
-| Code | Description |
-| --- | --- |
-| `expired_challenge` | Payment validated after `expiresAt`, or receipt presented after the grace window |
-| `network_mismatch` | Wrong network |
-| `invalid_amount` | Amount mismatch |
-| `invalid_asset` | Asset mismatch or disallowed field (Paths, SendMax, DeliverMin, partial payment flag) |
-| `invalid_destination` | Destination mismatch, or `DestinationTag` present (not supported in v1 safe mode) |
-| `invalid_memo` | Memo missing, malformed, `paymentId` mismatch, or `sessionId` mismatch |
-| `invalid_receipt` | Receipt malformed |
-| `replay_detected` | `paymentId` or `txHash` reused |
-| `tx_not_validated` | Transaction not validated |
-| `tx_not_found` | Unknown `txHash` |
-| `tx_failed` | Validated but not successful (`meta.TransactionResult` ≠ `tesSUCCESS`), or metadata / `delivered_amount` missing |
+| Code                  | Description                                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `expired_challenge`   | Payment validated after `expiresAt`, or receipt presented after the grace window                                 |
+| `network_mismatch`    | Wrong network                                                                                                    |
+| `invalid_amount`      | Amount mismatch                                                                                                  |
+| `invalid_asset`       | Asset mismatch or disallowed field (Paths, SendMax, DeliverMin, partial payment flag)                            |
+| `invalid_destination` | Destination mismatch, or `DestinationTag` present (not supported in v1 safe mode)                                |
+| `invalid_memo`        | Memo missing, malformed, `paymentId` mismatch, or `sessionId` mismatch                                           |
+| `invalid_receipt`     | Receipt malformed                                                                                                |
+| `replay_detected`     | `paymentId` or `txHash` reused                                                                                   |
+| `tx_not_validated`    | Transaction not validated                                                                                        |
+| `tx_not_found`        | Unknown `txHash`                                                                                                 |
+| `tx_failed`           | Validated but not successful (`meta.TransactionResult` ≠ `tesSUCCESS`), or metadata / `delivered_amount` missing |
 
 ### Notes on specific codes
 
