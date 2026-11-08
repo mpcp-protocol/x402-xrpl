@@ -337,8 +337,10 @@ export async function verifyExactPayload(
     const forMulti: Record<string, unknown> = { ...tx, SigningPubKey: "" };
     delete forMulti.Signers;
     delete forMulti.TxnSignature;
+    // Phase 1: local checks only (shape, duplicates, SignerList membership,
+    // signature), in signer order. No ledger lookups until all of them pass.
     const seen = new Set<string>();
-    let total = 0;
+    const checked: Array<{ account: string; pub: string; weight: number }> = [];
     for (const entry of signers!) {
       const s = entry.Signer;
       const sa = s?.Account;
@@ -372,15 +374,23 @@ export async function verifyExactPayload(
       }
       if (!valid)
         fail("multisig_signature_invalid", `invalid signature from ${sa}`);
-      await assertSigningKeyAuthorized(
-        params.fetchAccountState,
-        network,
-        sa,
-        pub,
-        { code: "multisig_signer_not_authorized" },
-      );
-      total += weight;
+      checked.push({ account: sa, pub, weight });
     }
+    // Phase 2: key authorization needs each signer's account state. Fetch
+    // them concurrently; if several fail, report the first in signer order.
+    const results = await Promise.allSettled(
+      checked.map((c) =>
+        assertSigningKeyAuthorized(
+          params.fetchAccountState,
+          network,
+          c.account,
+          c.pub,
+          { code: "multisig_signer_not_authorized" },
+        ),
+      ),
+    );
+    for (const r of results) if (r.status === "rejected") throw r.reason;
+    const total = checked.reduce((sum, c) => sum + c.weight, 0);
     if (total < payer.signerList.quorum)
       fail("multisig_quorum_not_met", "signer weights below quorum");
   } else {

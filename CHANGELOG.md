@@ -1,5 +1,19 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
+- Multisig verification in the `exact` scheme fetches signer account states
+  concurrently instead of one at a time, so a payment with N signers waits on
+  one round of ledger lookups instead of N. All local checks (entry shape,
+  duplicates, SignerList membership, signatures) still run first, in signer
+  order, before any lookup. If several signers fail key authorization, the
+  error names the first one in signer order.
+- When one signer's key is unauthorized and a later signer's signature is
+  invalid, verification now reports `multisig_signature_invalid` (previously
+  `multisig_signer_not_authorized`). The payment is rejected either way.
+
 ## 0.4.0 (2026-11-08)
 
 ### Changed
