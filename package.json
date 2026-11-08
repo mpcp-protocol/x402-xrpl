@@ -57,7 +57,7 @@
     "dev": "tsx src/index.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "tsx --test test/**/*.test.ts",
+    "test": "tsx --test \"test/**/*.test.ts\"",
     "prepublishOnly": "pnpm build"
   },
   "devDependencies": {
