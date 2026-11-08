@@ -9,10 +9,20 @@
   one round of ledger lookups instead of N. All local checks (entry shape,
   duplicates, SignerList membership, signatures) still run first, in signer
   order, before any lookup. If several signers fail key authorization, the
-  error names the first one in signer order.
-- When one signer's key is unauthorized and a later signer's signature is
-  invalid, verification now reports `multisig_signature_invalid` (previously
-  `multisig_signer_not_authorized`). The payment is rejected either way.
+  error names the first one in signer order, and it is thrown without waiting
+  for later signers' lookups.
+- `fetchAccountState` may now be called concurrently, up to 32 times (the
+  XRPL SignerList maximum) for one verification. Implementations must handle
+  overlapping calls; add your own limiter if your RPC needs one. Errors it
+  throws still propagate unchanged.
+- The multisig quorum check now runs before any signer lookup, so an
+  under-quorum payload is rejected without ledger requests.
+- Error precedence for payloads that fail more than one check: an invalid
+  signature on any signer is reported before an unauthorized key on an earlier
+  one (previously `multisig_signer_not_authorized`, now
+  `multisig_signature_invalid`), and an under-quorum payload with an
+  unauthorized key reports `multisig_quorum_not_met`. The payment is rejected
+  either way.
 
 ## 0.4.0 (2026-11-08)
 

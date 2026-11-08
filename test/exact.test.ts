@@ -334,7 +334,7 @@ test("multisig signer account lookups run concurrently", async () => {
     validatedLedgerIndex: LEDGER,
   });
   assert.equal(r.ok, true);
-  assert.equal(maxInFlight, 2);
+  assert.ok(maxInFlight >= 2, `max in flight: ${maxInFlight}`);
 });
 
 test("several unauthorized signers → error names the first in signer order", async () => {
@@ -361,6 +361,50 @@ test("several unauthorized signers → error names the first in signer order", a
       return true;
     },
   );
+});
+
+test(
+  "unauthorized signer fails without waiting for later lookups",
+  { timeout: 2000 },
+  async () => {
+    const map = engState();
+    map[a1.address] = funded({ masterDisabled: true });
+    const base = states(map);
+    // a2's lookup never settles; verification must still reject on a1.
+    const fetchAccountState: FetchAccountState = async (net, account) => {
+      if (account === a2.address) return new Promise(() => {});
+      return base(net, account);
+    };
+    await rejects(
+      "multisig_signer_not_authorized",
+      verifyExactPayload({
+        requirements: reqXrp(),
+        payload: { signedTxBlob: multiSigned(engTx(), [a1, a2]) },
+        fetchAccountState,
+        validatedLedgerIndex: LEDGER,
+      }),
+    );
+  },
+);
+
+test("below quorum → rejected before any signer lookup", async () => {
+  const map = engState();
+  const base = states(map);
+  const looked: string[] = [];
+  const fetchAccountState: FetchAccountState = async (net, account) => {
+    if (account !== eng.address) looked.push(account);
+    return base(net, account);
+  };
+  await rejects(
+    "multisig_quorum_not_met",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: multiSigned(engTx(), [a1]) },
+      fetchAccountState,
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+  assert.deepEqual(looked, []);
 });
 
 // ── field checks ──────────────────────────────────────────────────────────────
