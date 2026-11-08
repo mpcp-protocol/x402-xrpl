@@ -466,6 +466,24 @@ test("Signers order is by account ID, not by address string", async () => {
   );
 });
 
+test("Signers order is checked before any signature", async () => {
+  // Out of order AND every signature broken (Fee changed after signing): the
+  // structural error must win, so no signature work is done on such a blob.
+  const map = engState();
+  const { decode } = await import("ripple-binary-codec");
+  const unsorted = multiSigned(engTx(), [a2, a1], { keepOrder: true });
+  const tampered = encode({ ...(decode(unsorted) as Tx), Fee: "21" });
+  await rejects(
+    "invalid_transaction",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: tampered },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+});
+
 test("more than 32 signers → invalid_transaction", async () => {
   const map = engState();
   const many = Array.from({ length: 33 }, () => wallet());
@@ -480,7 +498,7 @@ test("more than 32 signers → invalid_transaction", async () => {
   );
 });
 
-test("payer signing its own multisig → multisig_signer_not_authorized", async () => {
+test("payer signing its own multisig → invalid_transaction", async () => {
   const map = engState();
   // Even if the payer appears on its own SignerList, it may not sign.
   map[eng.address].signerList!.signers.push({
@@ -497,7 +515,7 @@ test("payer signing its own multisig → multisig_signer_not_authorized", async 
     }),
     (e: unknown) => {
       assert(e instanceof ExactVerificationError, String(e));
-      assert.equal(e.code, "multisig_signer_not_authorized");
+      assert.equal(e.code, "invalid_transaction");
       assert.match(e.message, /payer account/);
       return true;
     },

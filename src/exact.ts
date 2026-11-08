@@ -92,7 +92,12 @@ export type FetchAccountState = (
 ) => Promise<XrplAccountState | null>;
 
 const PARTIAL_PAYMENT_FLAG = 0x00020000;
-/** Most `Signers` entries a multisigned transaction may carry (rippled limit). */
+/**
+ * Most `Signers` entries a multisigned transaction may carry (rippled limit
+ * with the ExpandedSignerList amendment). Networks without that amendment cap
+ * a SignerList at 8 accounts, so extra signers there already fail the
+ * SignerList membership check.
+ */
 const MAX_MULTISIG_SIGNERS = 32;
 
 /** Compares two account IDs as unsigned 160-bit numbers, the order rippled requires for `Signers`. */
@@ -348,25 +353,12 @@ export async function verifyExactPayload(
         `Signers has ${signers!.length} entries; at most ${MAX_MULTISIG_SIGNERS} allowed`,
       );
     }
-    if (!payer || !payer.exists)
-      fail("multisig_account_not_found", "payer account not found on ledger");
-    if (!payer.signerList || payer.signerList.signers.length === 0) {
-      fail(
-        "multisig_signer_not_authorized",
-        "payer has no SignerList; multisig not authorized",
-      );
-    }
-    const weights = new Map(
-      payer.signerList.signers.map((s) => [s.account, s.weight]),
-    );
-    const forMulti: Record<string, unknown> = { ...tx, SigningPubKey: "" };
-    delete forMulti.Signers;
-    delete forMulti.TxnSignature;
-    // Phase 1: local checks only (shape, duplicates, SignerList membership,
-    // signature), in signer order. No ledger lookups until all of them pass.
-    const seen = new Set<string>();
+    // Structural pass: no ledger data or signature work. Each Signer entry
+    // is well-formed, is not the payer, and Signers is strictly ascending by
+    // account ID (rippled's order; not the address string order), which also
+    // rules out duplicates.
+    const entries: Array<{ account: string; pub: string; sig: string }> = [];
     let prevId: Uint8Array | undefined;
-    const checked: Array<{ account: string; pub: string; weight: number }> = [];
     for (const entry of signers!) {
       const s = entry.Signer;
       const sa = s?.Account;
@@ -381,22 +373,38 @@ export async function verifyExactPayload(
       }
       if (sa === account)
         fail(
-          "multisig_signer_not_authorized",
+          "invalid_transaction",
           "the payer account cannot sign its own multisigned transaction",
         );
-      if (seen.has(sa))
-        fail("multisig_signer_not_authorized", "duplicate signer");
-      seen.add(sa);
-      // rippled requires Signers sorted by account ID (not by address string).
-      let id: Uint8Array;
-      try {
-        id = decodeAccountID(sa);
-      } catch {
-        fail("multisig_signature_invalid", `malformed Signer account ${sa}`);
+      const id = decodeAccountID(sa);
+      if (prevId) {
+        const order = compareAccountIds(prevId, id);
+        if (order === 0)
+          fail("multisig_signer_not_authorized", "duplicate signer");
+        if (order > 0)
+          fail("invalid_transaction", "Signers must be sorted by account ID");
       }
-      if (prevId && compareAccountIds(prevId, id) >= 0)
-        fail("invalid_transaction", "Signers must be sorted by account ID");
       prevId = id;
+      entries.push({ account: sa, pub, sig });
+    }
+    if (!payer || !payer.exists)
+      fail("multisig_account_not_found", "payer account not found on ledger");
+    if (!payer.signerList || payer.signerList.signers.length === 0) {
+      fail(
+        "multisig_signer_not_authorized",
+        "payer has no SignerList; multisig not authorized",
+      );
+    }
+    const weights = new Map(
+      payer.signerList.signers.map((s) => [s.account, s.weight]),
+    );
+    const forMulti: Record<string, unknown> = { ...tx, SigningPubKey: "" };
+    delete forMulti.Signers;
+    delete forMulti.TxnSignature;
+    // Phase 1: SignerList membership and signatures, in signer order. No
+    // ledger lookups until all of them pass.
+    const checked: Array<{ account: string; pub: string; weight: number }> = [];
+    for (const { account: sa, pub, sig } of entries) {
       const weight = weights.get(sa);
       if (weight === undefined)
         fail(
