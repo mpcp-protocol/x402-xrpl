@@ -205,11 +205,11 @@ test("multisig at quorum verifies", async () => {
   assert.equal(r.multisig, true);
 });
 
-test("below quorum → quorum_not_met", async () => {
+test("below quorum → multisig_quorum_not_met", async () => {
   const map = engState();
   const blob = multiSigned(engTx(), [a1]);
   await rejects(
-    "quorum_not_met",
+    "multisig_quorum_not_met",
     verifyExactPayload({
       requirements: reqXrp(),
       payload: { signedTxBlob: blob },
@@ -219,13 +219,13 @@ test("below quorum → quorum_not_met", async () => {
   );
 });
 
-test("signer not on the SignerList → signer_not_authorized", async () => {
+test("signer not on the SignerList → multisig_signer_not_authorized", async () => {
   const map = engState();
   const outsider = wallet();
   map[outsider.address] = funded();
   const blob = multiSigned(engTx(), [a1, outsider]);
   await rejects(
-    "signer_not_authorized",
+    "multisig_signer_not_authorized",
     verifyExactPayload({
       requirements: reqXrp(),
       payload: { signedTxBlob: blob },
@@ -235,13 +235,13 @@ test("signer not on the SignerList → signer_not_authorized", async () => {
   );
 });
 
-test("multisig tampered after signing → signature_invalid", async () => {
+test("multisig tampered after signing → multisig_signature_invalid", async () => {
   const map = engState();
   const { decode } = await import("ripple-binary-codec");
   const good = multiSigned(engTx(), [a1, a2]);
   const tampered = encode({ ...(decode(good) as Tx), Fee: "21" });
   await rejects(
-    "signature_invalid",
+    "multisig_signature_invalid",
     verifyExactPayload({
       requirements: reqXrp(),
       payload: { signedTxBlob: tampered },
@@ -251,7 +251,7 @@ test("multisig tampered after signing → signature_invalid", async () => {
   );
 });
 
-test("no valid signer at all → signer_not_authorized", async () => {
+test("no valid signer at all → multisig_signer_not_authorized", async () => {
   const map = engState();
   const x = wallet();
   const y = wallet();
@@ -259,7 +259,7 @@ test("no valid signer at all → signer_not_authorized", async () => {
   map[y.address] = funded();
   const blob = multiSigned(engTx(), [x, y]);
   await rejects(
-    "signer_not_authorized",
+    "multisig_signer_not_authorized",
     verifyExactPayload({
       requirements: reqXrp(),
       payload: { signedTxBlob: blob },
