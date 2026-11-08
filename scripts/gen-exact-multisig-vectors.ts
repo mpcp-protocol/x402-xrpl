@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { decode, encode } from "ripple-binary-codec";
 import { generateSeed } from "ripple-keypairs";
 
-import type { XrplAccountState } from "../src/exact.js";
+import type { ExactErrorCode, XrplAccountState } from "../src/exact.js";
 import {
   byAccountId,
   multiSigned as multiSign,
@@ -121,21 +121,15 @@ function states(
   };
 }
 
-/**
- * Proposed spec identifier (x402 XRPL exact spec §10.1) for each adapter code
- * these vectors use. In multisig verification the adapter's
- * `invalid_transaction` is always a structural `Signers` failure.
- */
-const SPEC_IDENTIFIER: Record<string, string> = {
-  invalid_transaction: "invalid_exact_xrpl_payload_multisig_signers_malformed",
-  multisig_account_not_found:
-    "invalid_exact_xrpl_payload_multisig_account_not_found",
-  multisig_signer_not_authorized:
-    "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
-  multisig_signature_invalid:
-    "invalid_exact_xrpl_payload_multisig_signature_invalid",
-  multisig_quorum_not_met: "invalid_exact_xrpl_payload_multisig_quorum_not_met",
-};
+/** The rejection identifiers proposed in §10.1 of the x402 XRPL `exact` spec. */
+export const SPEC_IDENTIFIERS = [
+  "invalid_exact_xrpl_payload_multisig_signers_malformed",
+  "invalid_exact_xrpl_payload_multisig_account_not_found",
+  "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
+  "invalid_exact_xrpl_payload_multisig_signature_invalid",
+  "invalid_exact_xrpl_payload_multisig_quorum_not_met",
+] as const;
+export type SpecIdentifier = (typeof SPEC_IDENTIFIERS)[number];
 
 interface Case {
   id: string;
@@ -143,7 +137,9 @@ interface Case {
   specRule: string;
   signedTxBlob: string;
   accountStates: Record<string, AccountState>;
-  expect: { ok: true } | { ok: false; code: string; specIdentifier: string };
+  expect:
+    | { ok: true }
+    | { ok: false; code: ExactErrorCode; specIdentifier: SpecIdentifier };
 }
 
 function ok(
@@ -162,16 +158,15 @@ function ok(
     expect: { ok: true },
   };
 }
+/** A case that must be rejected with adapter `code` and §10.1 `specIdentifier`. */
 function rejects(
   id: string,
   description: string,
   specRule: string,
-  code: string,
+  [code, specIdentifier]: [ExactErrorCode, SpecIdentifier],
   signedTxBlob: string,
   accountStates = states(),
 ): Case {
-  const specIdentifier = SPEC_IDENTIFIER[code];
-  if (!specIdentifier) throw new Error(`no spec identifier for ${code}`);
   return {
     id,
     description,
@@ -257,14 +252,20 @@ export function buildVectors() {
       "multisig_below_quorum",
       "One valid listed signer (weight 1) against quorum 2",
       "§10.1.4",
-      "multisig_quorum_not_met",
+      [
+        "multisig_quorum_not_met",
+        "invalid_exact_xrpl_payload_multisig_quorum_not_met",
+      ],
       multiSigned([s1]),
     ),
     rejects(
       "multisig_signer_not_on_signer_list",
       "One signer is not on the payer's SignerList",
       "§10.1.3",
-      "multisig_signer_not_authorized",
+      [
+        "multisig_signer_not_authorized",
+        "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
+      ],
       multiSigned([s1, outsider]),
       states({ [outsider.address]: funded() }),
     ),
@@ -272,21 +273,30 @@ export function buildVectors() {
       "multisig_tampered_after_signing",
       "Fee changed after the signers signed: signatures no longer verify",
       "§10.1.3",
-      "multisig_signature_invalid",
+      [
+        "multisig_signature_invalid",
+        "invalid_exact_xrpl_payload_multisig_signature_invalid",
+      ],
       tampered,
     ),
     rejects(
       "multisig_duplicate_signer",
       "The same signer appears twice",
       "§10.1.3",
-      "multisig_signer_not_authorized",
+      [
+        "multisig_signer_not_authorized",
+        "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
+      ],
       multiSigned([s1, s1]),
     ),
     rejects(
       "multisig_signer_master_disabled",
       "A listed signer signs with its master key, which is disabled, and has no RegularKey",
       "§10.1.3",
-      "multisig_signer_not_authorized",
+      [
+        "multisig_signer_not_authorized",
+        "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
+      ],
       multiSigned([s1, s2]),
       states({ [s2.address]: funded({ masterDisabled: true }) }),
     ),
@@ -294,7 +304,10 @@ export function buildVectors() {
       "multisig_unfunded_signer_wrong_key",
       "A signer account that does not exist on the ledger signs with a key that is not its own master key",
       "§10.1.3 (signer account need not exist)",
-      "multisig_signer_not_authorized",
+      [
+        "multisig_signer_not_authorized",
+        "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
+      ],
       multiSigned([s1, { as: s2.address, key: outsider }]),
       unfunded,
     ),
@@ -302,7 +315,10 @@ export function buildVectors() {
       "multisig_malformed_signer_entry",
       "A Signer entry has no TxnSignature",
       "§10.1.3",
-      "multisig_signature_invalid",
+      [
+        "multisig_signature_invalid",
+        "invalid_exact_xrpl_payload_multisig_signature_invalid",
+      ],
       (() => {
         const tx = decode(multiSigned([s1, s2])) as {
           Signers: { Signer: Record<string, unknown> }[];
@@ -315,7 +331,10 @@ export function buildVectors() {
       "multisig_payer_not_found",
       "The payer account does not exist at the validated ledger",
       "§10.1.2",
-      "multisig_account_not_found",
+      [
+        "multisig_account_not_found",
+        "invalid_exact_xrpl_payload_multisig_account_not_found",
+      ],
       multiSigned([s1, s2]),
       (() => {
         const m = states();
@@ -327,7 +346,10 @@ export function buildVectors() {
       "multisig_payer_no_signer_list",
       "The payer exists but has no SignerList",
       "§10.1.2",
-      "multisig_signer_not_authorized",
+      [
+        "multisig_signer_not_authorized",
+        "invalid_exact_xrpl_payload_multisig_signer_not_authorized",
+      ],
       multiSigned([s1, s2]),
       states({ [payer.address]: payerState(null) }),
     ),
@@ -335,7 +357,10 @@ export function buildVectors() {
       "multisig_unsorted_signers",
       "Signers not in ascending account-ID order",
       "§10.1.3",
-      "invalid_transaction",
+      [
+        "invalid_transaction",
+        "invalid_exact_xrpl_payload_multisig_signers_malformed",
+      ],
       multiSigned([...[s1, s2].sort(byAccountId)].reverse(), {
         keepOrder: true,
       }),
@@ -344,7 +369,10 @@ export function buildVectors() {
       "multisig_sorted_by_address_string",
       "Signers in address-string order, which is not account-ID order for this pair",
       "§10.1.3 (sort key is AccountID)",
-      "invalid_transaction",
+      [
+        "invalid_transaction",
+        "invalid_exact_xrpl_payload_multisig_signers_malformed",
+      ],
       multiSigned([strM, strP], { keepOrder: true }),
       strPairStates,
     ),
@@ -352,14 +380,20 @@ export function buildVectors() {
       "multisig_too_many_signers",
       "33 Signers entries (the maximum is 32)",
       "§10.1.3",
-      "invalid_transaction",
+      [
+        "invalid_transaction",
+        "invalid_exact_xrpl_payload_multisig_signers_malformed",
+      ],
       multiSigned(thirtyThree),
     ),
     rejects(
       "multisig_payer_signs_for_itself",
       "The payer account appears among its own signers (even though the fixture lists it on its own SignerList)",
       "§10.1.3",
-      "invalid_transaction",
+      [
+        "invalid_transaction",
+        "invalid_exact_xrpl_payload_multisig_signers_malformed",
+      ],
       multiSigned([payer, s1]),
       withPayerOnList,
     ),
@@ -367,7 +401,10 @@ export function buildVectors() {
       "multisig_nonempty_signing_pub_key",
       "Signers present but the top-level SigningPubKey is not empty",
       "§10.1.1",
-      "invalid_transaction",
+      [
+        "invalid_transaction",
+        "invalid_exact_xrpl_payload_multisig_signers_malformed",
+      ],
       encode({
         ...(decode(multiSigned([s1, s2])) as Record<string, unknown>),
         SigningPubKey: s1.publicKey,
@@ -376,9 +413,9 @@ export function buildVectors() {
   ];
 
   return {
-    version: 1,
+    version: 2,
     description:
-      "Deterministic conformance vectors for multisig verification in the x402 XRPL `exact` scheme (spec §10.1). Each case is verified offline against `accountStates`, keyed by account address. Keys come from fixed test-only seeds; never use them for real funds.",
+      "Deterministic conformance vectors for multisig verification in the x402 XRPL `exact` scheme (spec §10.1). Each case is verified offline against `accountStates`, keyed by account address. Every rejected case names the adapter's error code and its §10.1 spec identifier. Keys come from fixed test-only seeds; never use them for real funds.",
     requirements,
     validatedLedgerIndex: LEDGER,
     cases,
