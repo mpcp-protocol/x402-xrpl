@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "private": false,
   "description": "TypeScript x402 v2 settlement adapter for XRPL: issue challenges, build payment memos, verify on-ledger settlement, replay-safe.",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "keywords": [
     "x402",
     "x402 v2",
