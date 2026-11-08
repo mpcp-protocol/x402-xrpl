@@ -269,6 +269,50 @@ test("no valid signer at all → multisig_signer_not_authorized", async () => {
   );
 });
 
+test("multisig payer not on ledger → multisig_account_not_found", async () => {
+  const map = engState();
+  delete map[eng.address];
+  const blob = multiSigned(engTx(), [a1, a2]);
+  await rejects(
+    "multisig_account_not_found",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: blob },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+});
+
+test("duplicate multisig signer → multisig_signer_not_authorized", async () => {
+  const map = engState();
+  const blob = multiSigned(engTx(), [a1, a1]);
+  await rejects(
+    "multisig_signer_not_authorized",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: blob },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+});
+
+test("listed signer using a disabled master key → multisig_signer_not_authorized", async () => {
+  const map = engState();
+  map[a2.address] = funded({ masterDisabled: true });
+  const blob = multiSigned(engTx(), [a1, a2]);
+  await rejects(
+    "multisig_signer_not_authorized",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: blob },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+});
+
 // ── field checks ──────────────────────────────────────────────────────────────
 
 test("destination / amount / forbidden-field / invoice / expiry / fee checks", async () => {
