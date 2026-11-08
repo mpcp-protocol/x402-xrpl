@@ -19,6 +19,7 @@ import {
   encodeForMultisigning,
 } from "ripple-binary-codec";
 import { verify as kpVerify, deriveAddress } from "ripple-keypairs";
+import { decodeAccountID } from "ripple-address-codec";
 import { canonicalNetwork } from "./index.js";
 import type { PaymentRequirements } from "./envelope.js";
 
@@ -91,6 +92,14 @@ export type FetchAccountState = (
 ) => Promise<XrplAccountState | null>;
 
 const PARTIAL_PAYMENT_FLAG = 0x00020000;
+/** Most `Signers` entries a multisigned transaction may carry (rippled limit). */
+const MAX_MULTISIG_SIGNERS = 32;
+
+/** Compares two account IDs as unsigned 160-bit numbers, the order rippled requires for `Signers`. */
+function compareAccountIds(a: Uint8Array, b: Uint8Array): number {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i] - b[i];
+  return 0;
+}
 
 export interface VerifyExactParams {
   requirements: PaymentRequirements;
@@ -333,6 +342,12 @@ export async function verifyExactPayload(
         "SigningPubKey must be empty for a multisigned transaction",
       );
     }
+    if (signers!.length > MAX_MULTISIG_SIGNERS) {
+      fail(
+        "invalid_transaction",
+        `Signers has ${signers!.length} entries; at most ${MAX_MULTISIG_SIGNERS} allowed`,
+      );
+    }
     if (!payer || !payer.exists)
       fail("multisig_account_not_found", "payer account not found on ledger");
     if (!payer.signerList || payer.signerList.signers.length === 0) {
@@ -350,6 +365,7 @@ export async function verifyExactPayload(
     // Phase 1: local checks only (shape, duplicates, SignerList membership,
     // signature), in signer order. No ledger lookups until all of them pass.
     const seen = new Set<string>();
+    let prevId: Uint8Array | undefined;
     const checked: Array<{ account: string; pub: string; weight: number }> = [];
     for (const entry of signers!) {
       const s = entry.Signer;
@@ -363,9 +379,24 @@ export async function verifyExactPayload(
       ) {
         fail("multisig_signature_invalid", "malformed Signer entry");
       }
+      if (sa === account)
+        fail(
+          "multisig_signer_not_authorized",
+          "the payer account cannot sign its own multisigned transaction",
+        );
       if (seen.has(sa))
         fail("multisig_signer_not_authorized", "duplicate signer");
       seen.add(sa);
+      // rippled requires Signers sorted by account ID (not by address string).
+      let id: Uint8Array;
+      try {
+        id = decodeAccountID(sa);
+      } catch {
+        fail("multisig_signature_invalid", `malformed Signer account ${sa}`);
+      }
+      if (prevId && compareAccountIds(prevId, id) >= 0)
+        fail("invalid_transaction", "Signers must be sorted by account ID");
+      prevId = id;
       const weight = weights.get(sa);
       if (weight === undefined)
         fail(

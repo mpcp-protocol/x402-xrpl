@@ -11,6 +11,7 @@ import {
   generateSeed,
   sign,
 } from "ripple-keypairs";
+import { decodeAccountID } from "ripple-address-codec";
 
 import {
   ExactVerificationError,
@@ -32,8 +33,8 @@ interface Wallet {
   publicKey: string;
   privateKey: string;
 }
-function wallet(): Wallet {
-  const kp = deriveKeypair(generateSeed({ algorithm: "ed25519" }));
+function wallet(seed = generateSeed({ algorithm: "ed25519" })): Wallet {
+  const kp = deriveKeypair(seed);
   return {
     address: deriveAddress(kp.publicKey),
     publicKey: kp.publicKey,
@@ -61,9 +62,22 @@ function singleSigned(tx: Tx, w: Wallet): string {
   const TxnSignature = sign(encodeForSigning(signing), w.privateKey);
   return encode({ ...signing, TxnSignature });
 }
-function multiSigned(tx: Tx, signers: Wallet[]): string {
+/** Orders wallets by account ID, the order rippled requires for `Signers`. */
+function byAccountId(a: Wallet, b: Wallet): number {
+  return Buffer.compare(
+    Buffer.from(decodeAccountID(a.address)),
+    Buffer.from(decodeAccountID(b.address)),
+  );
+}
+/** Multisigns `tx`; sorts `Signers` by account ID like xrpl.js unless `keepOrder`. */
+function multiSigned(
+  tx: Tx,
+  signers: Wallet[],
+  { keepOrder = false }: { keepOrder?: boolean } = {},
+): string {
   const base = { ...tx, SigningPubKey: "" };
-  const Signers = signers.map((s) => ({
+  const ordered = keepOrder ? signers : [...signers].sort(byAccountId);
+  const Signers = ordered.map((s) => ({
     Signer: {
       Account: s.address,
       SigningPubKey: s.publicKey,
@@ -171,8 +185,8 @@ test("regular key is accepted", async () => {
 
 // ── multisig (engagement-account shape) ───────────────────────────────────────
 
-const a1 = wallet();
-const a2 = wallet();
+// a1 sorts before a2 by account ID, so [a1, a2] is a valid Signers order.
+const [a1, a2] = [wallet(), wallet()].sort(byAccountId);
 const eng = wallet(); // engagement account: master disabled, 2-of-2 SignerList
 const engState = (): Record<string, XrplAccountState> => ({
   [eng.address]: funded({
@@ -405,6 +419,89 @@ test("below quorum → rejected before any signer lookup", async () => {
     }),
   );
   assert.deepEqual(looked, []);
+});
+
+test("Signers not sorted by account ID → invalid_transaction", async () => {
+  const map = engState();
+  const blob = multiSigned(engTx(), [a2, a1], { keepOrder: true });
+  await rejects(
+    "invalid_transaction",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: blob },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+});
+
+test("Signers order is by account ID, not by address string", async () => {
+  // Fixed test-only seeds: as strings rMwCk… < rpvva…, but by account ID
+  // rpvva… comes first. Comparing address strings would get this backwards.
+  const m = wallet("sEdSJHS4oiAdz7w2X2ni1gFiihccMfL"); // rMwCk9x2…
+  const p = wallet("sEdSJHS4oiAdz7w2X2ni1gFiiN7Jpvj"); // rpvvavrQ…
+  assert.ok(m.address < p.address);
+  const map = engState();
+  map[eng.address].signerList = {
+    quorum: 2,
+    signers: [
+      { account: m.address, weight: 1 },
+      { account: p.address, weight: 1 },
+    ],
+  };
+  map[m.address] = funded();
+  map[p.address] = funded();
+  const verify = (blob: string) =>
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: blob },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    });
+  const r = await verify(multiSigned(engTx(), [p, m], { keepOrder: true }));
+  assert.equal(r.ok, true);
+  await rejects(
+    "invalid_transaction",
+    verify(multiSigned(engTx(), [m, p], { keepOrder: true })),
+  );
+});
+
+test("more than 32 signers → invalid_transaction", async () => {
+  const map = engState();
+  const many = Array.from({ length: 33 }, () => wallet());
+  await rejects(
+    "invalid_transaction",
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: multiSigned(engTx(), many) },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+  );
+});
+
+test("payer signing its own multisig → multisig_signer_not_authorized", async () => {
+  const map = engState();
+  // Even if the payer appears on its own SignerList, it may not sign.
+  map[eng.address].signerList!.signers.push({
+    account: eng.address,
+    weight: 1,
+  });
+  const blob = multiSigned(engTx(), [eng, a1]);
+  await assert.rejects(
+    verifyExactPayload({
+      requirements: reqXrp(),
+      payload: { signedTxBlob: blob },
+      fetchAccountState: states(map),
+      validatedLedgerIndex: LEDGER,
+    }),
+    (e: unknown) => {
+      assert(e instanceof ExactVerificationError, String(e));
+      assert.equal(e.code, "multisig_signer_not_authorized");
+      assert.match(e.message, /payer account/);
+      return true;
+    },
+  );
 });
 
 // ── field checks ──────────────────────────────────────────────────────────────
