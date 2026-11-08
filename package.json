@@ -63,6 +63,7 @@
     "format:check": "prettier --check .",
     "test": "tsx --test \"test/**/*.test.ts\"",
     "typecheck": "tsc -p tsconfig.typecheck.json",
+    "vectors:exact-multisig": "tsx scripts/gen-exact-multisig-vectors.ts",
     "prepublishOnly": "pnpm build"
   },
   "devDependencies": {

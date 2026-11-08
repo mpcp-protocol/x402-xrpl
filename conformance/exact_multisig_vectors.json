@@ -1,0 +1,1000 @@
+{
+  "version": 1,
+  "description": "Deterministic conformance vectors for multisig verification in the x402 XRPL `exact` scheme (spec §10.1). Each case is verified offline against `accountStates`, keyed by account address. Keys come from fixed test-only seeds; never use them for real funds.",
+  "requirements": {
+    "scheme": "exact",
+    "network": "xrpl:1",
+    "amount": "1000000",
+    "asset": "XRP",
+    "payTo": "rsjkP4S4TCZL34LFEAirGFUwfoztGVtD4G",
+    "maxTimeoutSeconds": 60,
+    "extra": {
+      "areFeesSponsored": false
+    }
+  },
+  "validatedLedgerIndex": 1000,
+  "cases": [
+    {
+      "id": "multisig_at_quorum",
+      "description": "2-of-3 SignerList, two listed signers with valid signatures: verifies",
+      "specRule": "§10.1.3, §10.1.4",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "multisig_all_signers",
+      "description": "All three listed signers sign (weight 3 >= quorum 2): verifies",
+      "specRule": "§10.1.4",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED47FDEB4B6970000409755A3431D81EF5822EC9B3E74545B6F5E8A9BA463BFF8E744048DC594B1A2B2E38DF3BC2679532E3253C41E0B65F23AC594A55C8EC566F5194DA084CFF7B21E1931772CA9709CFB96C37092E0F11DFEAC999F43F90DBE0B1068114502B430451ED893ACFA451AA86E00112E396C604E1E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "multisig_unfunded_signer_master_key",
+      "description": "A signer account that does not exist on the ledger signs with the key its address derives from: verifies",
+      "specRule": "§10.1.3 (signer account need not exist)",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "multisig_signer_regular_key",
+      "description": "A signer with its master key disabled signs with its RegularKey: verifies",
+      "specRule": "§10.1.3 (RegularKey authorizes)",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED61B1410EFA1B6F5CE6E86CE016A2A9756EF78BE188039A1AE2C71C82DBCE66FF7440B8012E100B5DC94926565D3E8C22BEE4B3BF022FA9C56E16FE7579874F4E8736A8EEDCD1DA028BD97F3CF78137E43585000F46A69DB9196A33D44D1F86A32201811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": "r9o4jLGrFFGRHNAmJRLYyoLYGQgZ8W7U5F",
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "multisig_sorted_by_account_id",
+      "description": "Signers in account-ID order, which is the reverse of their address-string order: verifies",
+      "specRule": "§10.1.3 (sort key is AccountID)",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED06873FAF08A00694E69F9EBFF08BBFB4445AB3FB7002121A57B69CDE86890DCF7440D7F517E36DFAB2E3734D87A4D54537DC6D4D6554A71B0915425464ECE2FF24BD1A2DCF9E14DC72B0ACBFAC48A480841811632A7F6DD356F67632E2E721AE2E068114152A7FC178A84049EC9E086B8F41A05805FA873DE1E0107321ED62C7EA99704014F49A8AC289B1DB65F0F037615DF49450E7D63181C868D20F46744089DEF1B528C7DAC2BC729CA20A3639EFF92A5E165383FB40F6549EDA8871DAC31AC724D12D773FD016B198C96FBEF8CB72615784ECE160D7D85BC14639438F008114DD3699EA2B53925FCF5F7E8E0289836CAF536E14E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "rMwCk9x2rNzfdD64nULgKcz1jcbhKjwpPK",
+                "weight": 1
+              },
+              {
+                "account": "rpvvavrQ5jNKEq35nT2fJEa2UkNCLUQrf1",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rMwCk9x2rNzfdD64nULgKcz1jcbhKjwpPK": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rpvvavrQ5jNKEq35nT2fJEa2UkNCLUQrf1": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": true
+      }
+    },
+    {
+      "id": "multisig_below_quorum",
+      "description": "One valid listed signer (weight 1) against quorum 2",
+      "specRule": "§10.1.4",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_quorum_not_met",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_quorum_not_met"
+      }
+    },
+    {
+      "id": "multisig_signer_not_on_signer_list",
+      "description": "One signer is not on the payer's SignerList",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321EDB3E0E0F9B5109960063BFEF73E8325EAAEC8639C35B80E0FA2B992ACBC381CF67440C9231D74DF81161CBB59E4E9D4FC520ED4103D9934269DB5A5AA79D515A74D0476E3CC6755A6FEBE1B0CDAAFE8C9FCCE7FF9AAC5DCB8ABB99FBF7321666FC70D8114BF6E92DD044FE267F86139EBF506B52E17530860E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rJTUXSwjjHX3hbzn9Dc3T8KNgp2G5imDpq": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signer_not_authorized",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signer_not_authorized"
+      }
+    },
+    {
+      "id": "multisig_tampered_after_signing",
+      "description": "Fee changed after the signers signed: signatures no longer verify",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001F730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signature_invalid",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signature_invalid"
+      }
+    },
+    {
+      "id": "multisig_duplicate_signer",
+      "description": "The same signer appears twice",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signer_not_authorized",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signer_not_authorized"
+      }
+    },
+    {
+      "id": "multisig_signer_master_disabled",
+      "description": "A listed signer signs with its master key, which is disabled, and has no RegularKey",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signer_not_authorized",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signer_not_authorized"
+      }
+    },
+    {
+      "id": "multisig_unfunded_signer_wrong_key",
+      "description": "A signer account that does not exist on the ledger signs with a key that is not its own master key",
+      "specRule": "§10.1.3 (signer account need not exist)",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321EDB3E0E0F9B5109960063BFEF73E8325EAAEC8639C35B80E0FA2B992ACBC381CF674407C9713CE75323E6AF093EE1EEE25E215CC6D8AA3DF3D8189963812C43D3BEFF0994DE48BD92E83F00BD77129154DDF79A6E3383A0CF781C1AC7676730A2CE50C811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signer_not_authorized",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signer_not_authorized"
+      }
+    },
+    {
+      "id": "multisig_malformed_signer_entry",
+      "description": "A Signer entry has no TxnSignature",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signature_invalid",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signature_invalid"
+      }
+    },
+    {
+      "id": "multisig_payer_not_found",
+      "description": "The payer account does not exist at the validated ledger",
+      "specRule": "§10.1.2",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_account_not_found",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_account_not_found"
+      }
+    },
+    {
+      "id": "multisig_payer_no_signer_list",
+      "description": "The payer exists but has no SignerList",
+      "specRule": "§10.1.2",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": null
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "multisig_signer_not_authorized",
+        "specIdentifier": "invalid_exact_xrpl_payload_multisig_signer_not_authorized"
+      }
+    },
+    {
+      "id": "multisig_unsorted_signers",
+      "description": "Signers not in ascending account-ID order",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_transaction"
+      }
+    },
+    {
+      "id": "multisig_sorted_by_address_string",
+      "description": "Signers in address-string order, which is not account-ID order for this pair",
+      "specRule": "§10.1.3 (sort key is AccountID)",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED62C7EA99704014F49A8AC289B1DB65F0F037615DF49450E7D63181C868D20F46744089DEF1B528C7DAC2BC729CA20A3639EFF92A5E165383FB40F6549EDA8871DAC31AC724D12D773FD016B198C96FBEF8CB72615784ECE160D7D85BC14639438F008114DD3699EA2B53925FCF5F7E8E0289836CAF536E14E1E0107321ED06873FAF08A00694E69F9EBFF08BBFB4445AB3FB7002121A57B69CDE86890DCF7440D7F517E36DFAB2E3734D87A4D54537DC6D4D6554A71B0915425464ECE2FF24BD1A2DCF9E14DC72B0ACBFAC48A480841811632A7F6DD356F67632E2E721AE2E068114152A7FC178A84049EC9E086B8F41A05805FA873DE1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "rMwCk9x2rNzfdD64nULgKcz1jcbhKjwpPK",
+                "weight": 1
+              },
+              {
+                "account": "rpvvavrQ5jNKEq35nT2fJEa2UkNCLUQrf1",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rMwCk9x2rNzfdD64nULgKcz1jcbhKjwpPK": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rpvvavrQ5jNKEq35nT2fJEa2UkNCLUQrf1": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_transaction"
+      }
+    },
+    {
+      "id": "multisig_too_many_signers",
+      "description": "33 Signers entries (the maximum is 32)",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED8A0CE8C81C1D849F08BF84EB4E6F3845D0176DA8F7E8F484A0F5B4518EA07BEB74406E2C5923E613AD9FB29F5A3A0F57982EC6689CDF4661FF6E6E2A7287C0469BCFBD64C90AA9E68AC366C39450B1344F14E5552B9AEF0E73DE59C894DA1161B6098114012E66864B998A446EC275BB7E2CD32DBDB41975E1E0107321ED69E25904F7DE1A5211E3EAE7E02AA73BFE0F89E99EA0B790E410FE2CB07241F274401825346CE1F5FBED66B067F0DCE95E4B7AFBAF41E735A08AF4B984DACA4BC0463AAFED356BE523B6399E6EC242160444E83DAF326207E52A86051C6EF3085E048114048A3CB9188CF826B6CB15DDF49BD2715D16DA15E1E0107321ED7AF2902242A5559D23CCC232861D66C370B75399ABD7660C317AAAF02487737B744096907D70710F81AA1077CA7F9C3A7D3BCD7332C2080CC4691ACBEB0A97E9BD000F9891E563B09A20B55A7C4A476E60C4FF06133E9EDBB266685AA7E77EBDC8018114058E156BCEF10B4CB31E3075C81DD7CB04E9AD02E1E0107321EDC08D440CD5E2667CA249D2D5034C1BF4175C768B3937E8AAC891394294EA3E097440B7833B6A712F9E54A931E635B66DDBDF18612C1B1082194651EC86C89C5DC1B7619DF6324554B3DB5D15081444C444CD7654A312EC266A970C4710E6B4A9A40081140F751FF488AE3C383B699C58691244BA574758CAE1E0107321EDD3502834B37EE45E8B07BB13F4D1B91FEDE042511931D0013D2FE264B949350F7440D3C454F1AF060822E036EA2A5DEDCBBD73F09BC819C4D970498C5B9C97915314ED93E5337A4BDE0E2350E738A47F169B8EE8AFB3AC376E78910B0CF81776F80B81143EFB8BB5C0DC986C5B6C472AAEA178F80B425C28E1E0107321ED2ABBEC2AF020FBDEAE21FE2822E98221022945A58505A294CFA3BC4BCEB6B6EC7440B0DEE8691C101783672A4ECD7A31E595461AF95CC3603414792FEEA3E2E4D626BAC4F458E76CBDB0AAE73BC1B6A0F7B3DE319C6809822B2FFF548791B40490038114495E917AA74DE1B5F282CEB3B026B82CEBCB5294E1E0107321ED9E1C2ACA51AA7EDD92A13E194905BF263CEC957E3282961D45BEF167E1BEB698744064BA9D53DCB7A4951DCA2D4E8CF07024F77DD1578A6B2645ADCDFBCE99729B844765C31BD4F43D99708AAF56CE948F5813C283540A208E24C34E3B48DD431F0D81144B01AF862A3DE5D7E725960C09501483FF52EA5DE1E0107321ED56F7F8AC230734CBD8F2EF311C618E852E972F2AFBE951E0F4E8E015DDD98D57744086B340B8AEBA0A5980207AC39FB872754BC3C485C701031E7C827CC16F1F02A4FF46405853FF726FEAAD28AD269F2EAD3255DD62B3CF1B1AC3288A1E44A6430C811450A08845BC2296D00572FE9DA728350ACF6323C3E1E0107321ED081D6CE21119257BA7533495F7E575BBCD7E56C817438570A4D4AFDF390E1CDC744071F5026133F417CEE9459AA65F677CF32A09500FA102FAB26DBFC7D028A9AB0F89AD93A6426496D8FBA09C92061F931C892EBDB20458E6BBDAB1B2504C1FD20D81145F0400467A9B1AFD1BBB2D6C98A5991607C314AAE1E0107321EDA34CBA3D1C9F14FDB50607D90B9646B043F5EA2BBF5880FD9140C43E7F34CB067440223F2C94B6C578C97011751112024F7293D65FD61FE1BF944D4313EBE73662C6C930BB505C8CC3D89533A9FEFF4324AFF9DDB3A995716C343F5B0A892512750F8114640B69EE781D2570C68BE49D4C8E707EE85F71DFE1E0107321ED1EBE242DA03F9362BFA24D77A05E57566008906D954B08386B91E503395848FF7440E3DD8FA0672BD84E294906E148DA28FCC0C32BB38B4E7774C9E95F9688CF2185AEC692F55CDFD69680AFEBA5D09C9B8C6ECD8870E02E33AC6D1F03E4D8742108811464A1484333CF9B2095D3C565FA9307EDB7715694E1E0107321EDC14D7E0278B71B6FD5B3F93E6F150AEC0660A31AC3F82AA4D2C863ABA0657E7F74409F1DE496BBC805DEF67655B36436A8F558C1A25185AA29644897CE740E76F658B7E2EFF187048EFB945D0024550C8351835CB0A7355EC1A65B93BB9F3540FB068114695FC5D8422B570DECB6BB232763AA5981B6195DE1E0107321EDEB308C785CADE6CD062795DDFE3BC65D9871E4E057FF7070FDF395A56776731674408C80E47EB28BC350E476A188D85D5A619CD8C8185AFE0DB2D97D7C12E03209D00AE9565606F748921346DDD3885253327A7F1E47DC3D9FB6BF554BCB6E51600881148450E31E91419A7BE8FC042DD93026FD6AE53822E1E0107321ED1E1C95A4EE43049EC433EAE2EBC59C3B5E0BC659FA14B0C3190D9F5D007A3617744065602C30E0AEB02FDBA2A988A8621BE8AB5123172715D2212807AD0A8E6EAC86B34E1A544419DE0C5DFAA71907AFF722D5DE3589A4DF654D6C2F663B4A94FF01811495AB6FB7B61BA692B940DF2FCA14F483DA9F5558E1E0107321ED6513229241C32FC51D97264016EB42B67935385EA52B2E3F040CA55B1200918D74405555FAA5CB2E062CD7D5668DAB65119B5ECD78620AC28D8539A4FF490302AAADC32B8A99ACE6B202957C4427D294F1473F86FF86D61E2424AF96C9359A4288018114979D2A7D703F2212847A9751E578F20422E7A703E1E0107321EDEB74E739B8E9139DF70B790937F78A5344EB5D15A9D54647E696668C38A76AA774406D1B7BEE8E3C20BE0FAB91DDEACFD8D55182C3F44C04F41AC77C9E85F597AF18892E578C5D82A177E430905E71D1DD00934BD614A7E9D976798F541431C7600681149AC6390EA93B21B8F76EBB26E7E576926AF28DB7E1E0107321ED458FCF0D8AB157F87CD0DC3936CD5624C5833A7F023A1D24ACF65657726BCCDA74408C7DE1BE34BFEF97DCD4721DE0A593C109AA1240CAAA993FE2CA3791F211E62E0A4D359EC0AAC8AF0B83F0404325CFF5E7675AB80C8E53A736C7884E1455820281149C8F91556AB7AAEFC1C0861150283A86714F6141E1E0107321ED8D2C0CBED10FD9F6D0CC561C27FC98907DEF9F897D179C7B25BC260466D6F1E27440231CE926524DC8603F1CCAB5C33432C998567E1303FA982EAAE84C6A869784375D5496332091701263C7CEA00B7ABE874AF351FB5FBA640D31FAC67FD9EE2F008114A66C6EFDA542D694778CFBDAA0FD3C1CB875C9DAE1E0107321EDDB5BE50D22E9164FC33BF06EB0588B9E7C46209C96ABE432C0F367496B40DAAD7440FA73F92174ECEDFA1D72ABE22E90736DB9CF227C69F88B0A63C736D0B6AA3FCD7F8C820E8E7479F6FBB836B80F0EC703163B87387DD14FE8D14CFB41FA00E0008114A8AC9BD707E0C199B8563EAF16A12546F4CF68BFE1E0107321EDC2F9DF4A503B16CF77D589AFA292EC8F581E7702E6FA383DA8186743B1C3978F744001E6480EBE4486310F984A4679FCF28EC7AF6BA179D50250B155BEBB57E64EC9D3773B4B0578BDD154356F8A2546B40B5BBDB2326EF592E27B8BF7411C5651078114AA62EF0293DC76738630D6630DB99FAFFBCFE4C9E1E0107321EDCC4481ACF53B96B53896289C356B26A871FBCFC7B8873C9F2A2616D09B8839E37440673D1065BD47E5FDDCD7AF9846CE2A316BB35773A328207187CC75621C6C2E4D34AC08F526BB1B02B57208F01601B866545B43EF80D01E31F545DCE50F48BF0C8114B0ED447015C624B0276FCE8467420A0A1B8F433EE1E0107321ED959D24D2A23AC0C5A7299F45C32187B99070CBF975CF8E41671645FBDDFD5C2D7440E8F8A9A6C1309319699A0CAA29D6C185DCC89D1F710C7ECAB4B15CC4C0314495737631AADA5478493C82DAD6E24308F96B16C202AC25148CE6FCB1D73182270B8114C5135767341D9B4C08307998A88EBD5D32FF2E1EE1E0107321EDEF036C882A0D44254FF804AE3F30F905371223281F38C96132D31333B3CFAB037440084B3BF4A42182DB45E19280A2941E6DE6BE85A4F65FA7FBC2287F265694F8C88D4DE78887B3A7FDBEAE50A0BE17CA1017AE0E04C8B9F04838B2375E2A43D6068114C7160E0E20C399F5351BE83BC9BF48D7E1835C83E1E0107321EDDE00042C9ED5C63CF54187CA1EC3B57DBEB2781F7CCA44A73ACC133D54539A0E744004C1F63DDE61336C51B7E27EAABD2C2B4FB58B3D350E59ABF68226C4C3A71CA17ACFABA6E2FB2319A8AF0AEFCA7C9DFBC837683453C46CB8E6777CED19CBC80B8114D99C36C8F745E5D7E2936E493E60A6601FD52834E1E0107321ED4AFE295ADC1F1B3FAB540833E8F0C73EF2D8D7EC92ED820574DC656A32B1B1C27440095713372DC6D6E5B202F085A8F4E2A9AE8FA08F5DD49377C4148E44F295F0F81A012D9E326A0EE6DBD2BDE06CE5F6A883A57FBEDE00EE4C27ECD4178E958C0C8114DA6E727BF55338F1CB169D961E443FCAF4A7B62BE1E0107321ED75EE01FEEA52EF83BA2026413F5268DAB30D3C8078E43FEDF367B3D9798B327B74404114E426FA3E5545CE09BB548DD7CE0AED2A350787FA6408938476F2813E373F097E956C0834743E99322FC164A17CDAD60E93F1AD8511D77EBB042ADA9AB4098114DBFD1E7155854B9C1C1F1FFC75EB0F7C7417780EE1E0107321EDB7444FB8FF79E08E409D3A20C18C81D0A6334AD11E6AE61A2AA1998E512358ED7440A0BA8AAFCC42F13CF5324091D8A43A8355299D060CE900718FABB6B8652FE9D011819FD0FEE1AE8092F2AEDD385F58C7BE617804EA788A166C69864C0E37C0008114E2BC85C56447F556F6F8095F6739C1056986C9CCE1E0107321ED5DE36E29C503CB6A9292B5C06C08BC691222A9976DF26C04576C42B41DD9019C7440BE777FAB5950F95372A6C89C44D7F5FFB8BF2816EDCD98170ADCBADCA30C9C47D37FAA2E0A7F17DCB47BD8C0081D2453F7A9F815DC5E9E3E9E82ABCFB582B10D8114E705E13098A1D330932302A4DC6E192E5CCF72A5E1E0107321ED80FF25326A85B32C2820249747F05D71E60046F250F98DC646D45032C04BDCA9744063386742DE4703BB02F28A882EF6312D34E5FC83E2E830F1A2F1B09F1297DF908F2F08820704DC328332AADC714CC47CE2B973DBED799A3F615808E9AB09C30D8114EADF10F65BD2103862725C793F563345E622D34CE1E0107321ED7819F59724B111884FEFFD140DD33763F121877ACEFA6F0B05B6988AE07CCBF274409A978610D9630F81083C4B8DB739CEAEE5E9CCF9AE81E3726495818AFECC627E8A10DEB1606D0CF257C4AE196BAA36339233D0D1343B4DC085B52FE14416380D8114F1C73A3DD57E19F37AEB2C99A8CBD8F54B088835E1E0107321ED2037974FB1BCAB4718C22D57D5BC65B3FB14B833A54089B0302EAFE8019835487440090A594E01E984CDD6AC37A60C12D90B826C85AC0795F1E4C3CD326AB98C6EB0F1DF5863D613C9427A247739979108B2233E4B578A3C5D191A861F5D343E18068114F75C4D99C2CD487070CE630ECFD33A7969018D33E1E0107321EDC8F6E234EEF6204F1197121596F9D03279ACE36D201C6D0705DB7644E2C9CCF474401BC823BB9C97B4849970A59EC48DC46F6A15B186F5F4A8D8B0D4E655C958911530C7D47D22124132ADF3C01AAB7ACEE91685B8DD075D2EFF55AB3AAFAB18360E8114F75C9DE64C13FEC297B816B539B4B64F40F5E706E1E0107321ED6245B14ADD7C82F8615C4A484F145535B6EB41B8D8FD86B5E7664DB00F21D7AF7440497942E1A4D55A7C458B6FEED234CE99634AE5A2387DAC5316431143068A85D33349712622BA0D8AF53824F9EB9ED501529EE1F98E3B64D44109E55E7B61300A8114F7C56922EA968D43C35AA481CEDEE7813F401D53E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_transaction"
+      }
+    },
+    {
+      "id": "multisig_payer_signs_for_itself",
+      "description": "The payer account appears among its own signers (even though the fixture lists it on its own SignerList)",
+      "specRule": "§10.1.3",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E730081140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED285956F908889F6E696B2C61071F20F77D9381DCB869FD4386E9E0E9049804867440E8AECBD7943A0A20F9B3822CE8D50EDA014F9B780F68D54F010587F46FFBA9135996A36391802B53A6652208560D89E59DF804D694E72E932215679918A40D0581140602A86C74BCD2E4CE5E999139BC2379CB11C140E1E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL",
+                "weight": 1
+              },
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_transaction"
+      }
+    },
+    {
+      "id": "multisig_nonempty_signing_pub_key",
+      "description": "Signers present but the top-level SigningPubKey is not empty",
+      "specRule": "§10.1.1",
+      "signedTxBlob": "1200002400000007201B000003F26140000000000F424068400000000000001E7321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E81140602A86C74BCD2E4CE5E999139BC2379CB11C14083141E05F041FE2D1817C41E58E50CA2B732FF0C1E64F3E0107321ED2A2EEC7AB1536614103FE5334382E3C5B2DB075EEEFC40584C026B080933331E7440230ABF4F00FE79149EBEA822D43D6E5BCF47EB4C16C41496341F612046A4C1963FBFC107306934BC29DA72C97CCDED342738582E4616D8B3DA5D57700A808A0E8114607A73C418A36A45BA353E155AC426B2BD29468FE1E0107321ED7D369B82A819745A10F56B07EC9D62CA5FCAE77C3B821E6A2AA4FD51FC0523DC7440AB0A8A64C82DDE8B4D89BFC873576E81FFA587B741CAF92CE20DA8DA9CFB5DEFCF1A0BBD0CF636AD35922B0A3F92A78BB4BCDE1ECB93D751790E014357CB9407811483A065B5FECF06DD9412499650D8E4375CFD98E4E1F1",
+      "accountStates": {
+        "rY8NF1Fopfjjp6BKMjmMiReaHZPJgNvDL": {
+          "exists": true,
+          "masterDisabled": true,
+          "regularKey": null,
+          "sequence": 7,
+          "signerList": {
+            "quorum": 2,
+            "signers": [
+              {
+                "account": "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi",
+                "weight": 1
+              },
+              {
+                "account": "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL",
+                "weight": 1
+              },
+              {
+                "account": "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr",
+                "weight": 1
+              }
+            ]
+          }
+        },
+        "r9o3ZY2gK9TEsCMsEJL9iuXtqkF14zQpFi": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "rUzyCjMUV2xMSLHMVT1rvYj7PrDGfNikBL": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        },
+        "r3JttNDkgMHaD1pH1JMZ18Ptn7PubjJpzr": {
+          "exists": true,
+          "masterDisabled": false,
+          "regularKey": null,
+          "sequence": 1
+        }
+      },
+      "expect": {
+        "ok": false,
+        "code": "invalid_transaction"
+      }
+    }
+  ]
+}
