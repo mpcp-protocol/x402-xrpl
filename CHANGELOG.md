@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.0 (unreleased)
+
+### Changed
+
+- **Breaking:** multisig verification in the `exact` scheme now fails with
+  dedicated error codes — `multisig_signer_not_authorized`,
+  `multisig_quorum_not_met`, `multisig_signature_invalid` and
+  `multisig_account_not_found` — instead of reusing the single-sig codes.
+  Callers that match `signer_not_authorized`, `quorum_not_met`,
+  `signature_invalid` or `account_not_found` on multisig failures must switch
+  to the new codes.
+- Relicensed from MIT to Apache-2.0.
+
 ## 0.3.0 (unreleased)
 
 Adds the standard `exact` scheme and the x402 v2 HTTP envelope, so engagement

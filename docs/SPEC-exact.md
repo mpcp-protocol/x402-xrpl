@@ -87,6 +87,10 @@ else the tx hash).
 `expiry_invalid`, `fee_too_high`, `signature_invalid`, `signer_not_authorized`,
 `quorum_not_met`, `account_not_found`, `tx_failed`, `replay_detected`.
 
+Multisig verification reports its own codes: `multisig_signer_not_authorized`,
+`multisig_quorum_not_met`, `multisig_signature_invalid`,
+`multisig_account_not_found`.
+
 ## 5. Flow
 
 ```

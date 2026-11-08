@@ -1,4 +1,4 @@
-export const ADAPTER_VERSION = "0.3.0";
+export const ADAPTER_VERSION = "0.4.0";
 /**
  * Legacy header for the client-prepaid flow ({@link verifySettlement}).
  * @deprecated Prefer the x402 v2 envelope in `./envelope` (`PAYMENT-SIGNATURE` /
